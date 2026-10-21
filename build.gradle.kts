@@ -22,9 +22,16 @@ subprojects {
         toolchain { languageVersion = JavaLanguageVersion.of(21) }
     }
 
+    // 한글 Windows 기본 인코딩(MS949) 방지 / -parameters는 Boot 플러그인 없는 모듈용
+    tasks.withType<JavaCompile> {
+        options.encoding = "UTF-8"
+        options.compilerArgs.add("-parameters")
+    }
+
     configure<org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension> {
         compilerOptions {
             freeCompilerArgs.addAll("-Xjsr305=strict", "-Xannotation-default-target=param-property")
+            javaParameters = true
         }
     }
 
