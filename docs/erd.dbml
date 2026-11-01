@@ -1,0 +1,679 @@
+// https://dbdiagram.io/
+
+Project pickt {
+  database_type: 'MySQL'
+}
+
+// =====================================================================
+// member
+// =====================================================================
+
+Enum member_role {
+  READER
+  CREATOR
+  ADMIN
+}
+
+Enum member_status {
+  ACTIVE
+  SUSPENDED
+  WITHDRAWN
+}
+
+Table member {
+  id bigint [pk, increment]
+  email varchar(255) [not null, unique, note: '탈퇴 시 마스킹 처리']
+  password varchar(255) [not null, note: 'BCrypt 해시']
+  nickname varchar(30) [not null, unique, note: '탈퇴 시 마스킹 처리']
+  role member_role [not null, default: 'READER']
+  status member_status [not null, default: 'ACTIVE']
+  suspended_reason varchar(255)
+  withdrawn_at datetime [note: '소프트 딜리트 기준 일시']
+  created_at datetime [not null]
+  updated_at datetime [not null]
+
+  Note: '회원 기본 정보 및 탈퇴(Soft Delete) 관리'
+}
+
+Table creator_profile {
+  id bigint [pk, increment]
+  member_id bigint [not null, unique]
+  bio varchar(500)
+  profile_image_url varchar(500)
+  follower_count int [not null, default: 0]
+  created_at datetime [not null]
+  updated_at datetime [not null]
+
+  Note: '창작자 전용 프로필 정보'
+}
+
+Table follow {
+  id bigint [pk, increment]
+  follower_id bigint [not null]
+  creator_id bigint [not null]
+  created_at datetime [not null]
+
+  indexes {
+    (follower_id, creator_id) [unique]
+    creator_id
+  }
+}
+
+Enum application_status {
+  REQUESTED
+  APPROVED
+  REJECTED
+}
+
+Table creator_application {
+  id bigint [pk, increment]
+  member_id bigint [not null]
+  intro varchar(500) [not null]
+  portfolio_url varchar(500)
+  status application_status [not null, default: 'REQUESTED']
+  reject_reason varchar(255)
+  requested_at datetime [not null]
+  reviewed_by bigint
+  reviewed_at datetime
+
+  indexes {
+    (member_id, status)
+    status
+  }
+
+  Note: '일반 회원의 창작자 전환 심사 이력'
+}
+
+Ref: creator_profile.member_id - member.id
+Ref: creator_application.member_id > member.id
+Ref: follow.follower_id > member.id
+Ref: follow.creator_id > member.id
+
+// =====================================================================
+// content (주석 생략본)
+// =====================================================================
+
+Enum content_status {
+  DRAFT
+  PUBLISHED
+  STOPPED
+}
+
+Enum access_type {
+  FREE
+  PAID
+  MEMBERSHIP
+}
+
+Enum access_source {
+  PURCHASE
+  GIFT
+}
+
+Enum plan_status {
+  ACTIVE
+  CLOSED
+}
+
+Enum subscription_status {
+  ACTIVE
+  EXPIRED
+  CANCELED
+}
+
+Table category {
+  id bigint [pk, increment]
+  name varchar(30) [not null, unique]
+  sort_order int [not null, default: 0]
+}
+
+Table content {
+  id bigint [pk, increment]
+  creator_id bigint [not null]
+  category_id bigint [not null]
+  title varchar(100) [not null]
+  preview text
+  body mediumtext [not null]
+  thumbnail_url varchar(500)
+  access_type access_type [not null]
+  price int [not null, default: 0]
+  membership_plan_id bigint [not null]
+  status content_status [not null, default: 'DRAFT']
+  view_count bigint [not null, default: 0]
+  like_count int [not null, default: 0]
+  published_at datetime
+  created_at datetime [not null]
+  updated_at datetime [not null]
+
+  indexes {
+    (status, published_at)
+    (creator_id, status)
+    (category_id, status)
+  }
+}
+
+Table tag {
+  id bigint [pk, increment]
+  name varchar(30) [not null, unique]
+}
+
+Table content_tag {
+  content_id bigint [not null]
+  tag_id bigint [not null]
+
+  indexes {
+    (content_id, tag_id) [pk]
+    tag_id
+  }
+}
+
+Table content_like {
+  id bigint [pk, increment]
+  content_id bigint [not null]
+  member_id bigint [not null]
+  created_at datetime [not null]
+
+  indexes {
+    (content_id, member_id) [unique]
+  }
+}
+
+Table content_access {
+  id bigint [pk, increment]
+  member_id bigint [not null]
+  content_id bigint [not null]
+  source access_source [not null]
+  purchase_id bigint [not null]
+  granted_at datetime [not null]
+  first_viewed_at datetime
+  revoked_at datetime
+
+  indexes {
+    (member_id, content_id) [unique]
+  }
+}
+
+Table membership_plan {
+  id bigint [pk, increment]
+  creator_id bigint [not null]
+  name varchar(50) [not null]
+  description varchar(500)
+  monthly_price int [not null]
+  status plan_status [not null]
+  created_at datetime [not null]
+  updated_at datetime [not null]
+}
+
+Table membership_subscription {
+  id bigint [pk, increment]
+  plan_id bigint [not null]
+  member_id bigint [not null]
+  purchase_id bigint [not null]
+  status subscription_status [not null]
+  started_at datetime [not null]
+  expires_at datetime [not null]
+  created_at datetime [not null]
+
+  indexes {
+    (member_id, plan_id, status)
+    expires_at
+  }
+}
+
+Ref: content.category_id > category.id
+Ref: content.membership_plan_id > membership_plan.id
+Ref: content_tag.content_id > content.id
+Ref: content_tag.tag_id > tag.id
+Ref: content_like.content_id > content.id
+Ref: content_access.content_id > content.id
+Ref: membership_subscription.plan_id > membership_plan.id
+
+// =====================================================================
+// payment (주석 생략본)
+// =====================================================================
+
+Enum charge_status {
+  PENDING
+  PAID
+  FAILED
+  CANCELED
+}
+
+Enum purchase_target {
+  CONTENT
+  MEMBERSHIP
+  DONATION
+}
+
+Enum purchase_status {
+  COMPLETED
+  REFUNDED
+}
+
+Enum point_tx_type {
+  CHARGE
+  USE
+  REFUND
+  CHARGE_CANCEL
+}
+
+Table point_wallet {
+  id bigint [pk, increment]
+  member_id bigint [not null, unique]
+  balance bigint [not null, default: 0]
+  updated_at datetime [not null]
+}
+
+Table charge_order {
+  id bigint [pk, increment]
+  order_no varchar(64) [not null, unique]
+  member_id bigint [not null]
+  amount int [not null]
+  idempotency_key varchar(64) [not null, unique]
+  pg_provider varchar(30)
+  pg_payment_key varchar(200) [unique]
+  status charge_status [not null, default: 'PENDING']
+  requested_at datetime [not null]
+  paid_at datetime
+  canceled_at datetime
+}
+
+Table purchase {
+  id bigint [pk, increment]
+  buyer_id bigint [not null]
+  recipient_id bigint [not null]
+  seller_id bigint [not null]
+  target_type purchase_target [not null]
+  target_id bigint [not null]
+  list_price int [not null]
+  message varchar(200)
+  idempotency_key varchar(64) [not null, unique]
+  status purchase_status [not null, default: 'COMPLETED']
+  purchased_at datetime [not null]
+  refunded_at datetime
+  refund_reason varchar(255)
+
+  indexes {
+    (buyer_id, purchased_at)
+    (seller_id, purchased_at)
+    (target_type, target_id)
+  }
+}
+
+Table point_transaction {
+  id bigint [pk, increment]
+  wallet_id bigint [not null]
+  type point_tx_type [not null]
+  amount bigint [not null]
+  balance_after bigint [not null]
+  ref_type varchar(20) [not null]
+  ref_id bigint [not null]
+  created_at datetime [not null]
+
+  indexes {
+    (ref_type, ref_id, type) [unique]
+    (wallet_id, created_at)
+  }
+}
+
+Ref: point_transaction.wallet_id > point_wallet.id
+
+// =====================================================================
+// settlement
+// =====================================================================
+
+Enum sales_type {
+  SALE
+  REFUND
+}
+
+Enum revenue_type {
+  CONTENT
+  MEMBERSHIP
+  DONATION
+}
+
+Enum daily_settlement_status {
+  CALCULATED
+  CONFIRMED
+}
+
+Enum withdrawal_status {
+  REQUESTED
+  APPROVED
+  REJECTED
+  PAID
+}
+
+Enum payout_status {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+Enum creator_type {
+  INDIVIDUAL
+  BUSINESS
+}
+
+Enum verify_status {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+Enum recon_status {
+  RUNNING
+  MATCHED
+  MISMATCHED
+  FAILED
+}
+
+Enum mismatch_type {
+  MISSING_IN_SETTLEMENT
+  MISSING_IN_PAYMENT
+  AMOUNT_DIFF
+  STATUS_DIFF
+}
+
+Enum ledger_type {
+  DAILY_SETTLEMENT
+  WITHDRAWAL
+  WITHDRAWAL_REJECT
+}
+
+Table fee_policy {
+  id bigint [pk, increment]
+  creator_id bigint
+  revenue_type revenue_type [not null]
+  fee_rate decimal(5,4) [not null]
+  effective_from datetime [not null]
+  effective_to datetime
+  reason varchar(255)
+  created_by bigint [not null]
+  created_at datetime [not null]
+
+  Note: '판매 유형별 수수료율 이력 관리'
+}
+
+Table hold_policy {
+  id bigint [pk, increment]
+  hold_rate decimal(5,4) [not null]
+  hold_days int [not null]
+  effective_from datetime [not null]
+  created_by bigint [not null]
+  created_at datetime [not null]
+
+  Note: '환불 대비용 정산 보류금 정책'
+}
+
+Table sales_record {
+  id bigint [pk, increment]
+  event_id varchar(64) [not null, unique]
+  purchase_id bigint [not null]
+  creator_id bigint [not null]
+  type sales_type [not null]
+  revenue_type revenue_type [not null]
+  list_price bigint [not null]
+  fee_rate decimal(5,4) [not null]
+  fee_amount bigint [not null]
+  occurred_at datetime [not null]
+  hold_release_date date [note: '보류 해제 예정일 / 배치 쿼리 성능 최적화용 필터']
+  settlement_date date [note: '배치 처리 완료 시점 기록']
+
+  indexes {
+    (creator_id, occurred_at)
+    settlement_date
+  }
+
+  Note: '결제 이벤트 기반 판매 및 환불 원장'
+}
+
+Table daily_settlement {
+  id bigint [pk, increment]
+  settlement_date date [not null]
+  creator_id bigint [not null]
+  gross_sales bigint [not null]
+  refund_amount bigint [not null]
+  fee_amount bigint [not null]
+  net_amount bigint [not null]
+  hold_amount bigint [not null]
+  hold_release_amount bigint [not null, note: 'sales_record.hold_release_date 기준 해제액']
+  carry_over_amount bigint [not null, note: '전날 마이너스 잔액 이월분']
+  payable_amount bigint [not null]
+  status daily_settlement_status [not null]
+  created_at datetime [not null]
+
+  indexes {
+    (settlement_date, creator_id) [unique]
+  }
+
+  Note: '창작자 일일 정산 결과 (매일 배치 수행)'
+}
+
+Table creator_balance {
+  id bigint [pk, increment]
+  creator_id bigint [not null, unique]
+  available_amount bigint [not null, default: 0]
+  held_amount bigint [not null, default: 0]
+  updated_at datetime [not null]
+
+  Note: '창작자의 최종 정산 및 출금 가능 잔액'
+}
+
+Table balance_ledger {
+  id bigint [pk, increment]
+  creator_id bigint [not null]
+  type ledger_type [not null]
+  amount bigint [not null]
+  balance_after bigint [not null]
+  ref_id bigint [not null]
+  created_at datetime [not null]
+
+  indexes {
+    (type, ref_id) [unique]
+    (creator_id, created_at)
+  }
+
+  Note: '정산 잔액(creator_balance) 증감 이력'
+}
+
+Table settlement_account {
+  id bigint [pk, increment]
+  creator_id bigint [not null, unique]
+  bank_code varchar(10) [not null]
+  account_number varchar(255) [not null, note: '암호화 저장']
+  holder_name varchar(50) [not null]
+  verify_status verify_status [not null, default: 'PENDING']
+  verified_at datetime
+  updated_at datetime [not null]
+}
+
+Table tax_profile {
+  id bigint [pk, increment]
+  creator_id bigint [not null, unique]
+  creator_type creator_type [not null]
+  legal_name varchar(50) [not null]
+  resident_no_enc varchar(255) [note: '※ 포트폴리오용 암호화 더미 데이터 삽입 예정']
+  business_no varchar(20)
+  verify_status verify_status [not null, default: 'PENDING']
+  verified_at datetime
+  updated_at datetime [not null]
+
+  Note: '세금 신고용 실명 및 사업자/개인 식별 정보'
+}
+
+Table tax_policy {
+  id bigint [pk, increment]
+  creator_type creator_type [not null]
+  income_tax_rate decimal(5,4) [not null]
+  local_tax_rate decimal(5,4) [not null]
+  effective_from datetime [not null]
+  created_by bigint [not null]
+  created_at datetime [not null]
+}
+
+Table withholding_tax_monthly {
+  id bigint [pk, increment]
+  tax_month char(6) [not null]
+  creator_id bigint [not null]
+  payout_count int [not null]
+  gross_amount bigint [not null]
+  income_tax bigint [not null]
+  local_tax bigint [not null]
+  created_at datetime [not null]
+
+  indexes {
+    (tax_month, creator_id) [unique]
+  }
+}
+
+Table reconciliation_run {
+  id bigint [pk, increment]
+  target_date date [not null, unique]
+  status recon_status [not null]
+  payment_count int
+  payment_amount bigint
+  settlement_count int
+  settlement_amount bigint
+  mismatch_count int [not null, default: 0]
+  started_at datetime [not null]
+  finished_at datetime
+
+  Note: '결제/정산 원장 대사(Reconciliation) 실행 이력'
+}
+
+Table reconciliation_mismatch {
+  id bigint [pk, increment]
+  run_id bigint [not null]
+  purchase_id bigint [not null]
+  mismatch_type mismatch_type [not null]
+  payment_amount bigint
+  settlement_amount bigint
+  resolved_at datetime
+  resolved_by bigint
+  resolution_note varchar(255)
+
+  indexes {
+    (run_id, purchase_id, mismatch_type) [unique]
+    resolved_at
+  }
+
+  Note: '대사 불일치 내역 및 수동 처리 상태'
+}
+
+Table withdrawal_request {
+  id bigint [pk, increment]
+  creator_id bigint [not null]
+  amount bigint [not null]
+  idempotency_key varchar(64) [not null, unique]
+  status withdrawal_status [not null, default: 'REQUESTED']
+  reject_reason varchar(255)
+  requested_at datetime [not null]
+  reviewed_by bigint
+  reviewed_at datetime
+
+  indexes {
+    (creator_id, requested_at)
+    status
+  }
+}
+
+Table payout {
+  id bigint [pk, increment]
+  payout_no varchar(64) [not null, unique]
+  withdrawal_request_id bigint [not null, unique]
+  creator_id bigint [not null]
+  creator_type creator_type [not null]
+  gross_amount bigint [not null]
+  income_tax bigint [not null, default: 0]
+  local_tax bigint [not null, default: 0]
+  net_amount bigint [not null]
+  bank_code varchar(10) [not null]
+  account_number varchar(255) [not null]
+  status payout_status [not null, default: 'PENDING']
+  paid_at datetime
+  created_at datetime [not null]
+
+  indexes {
+    (creator_id, paid_at)
+  }
+
+  Note: '실제 계좌 이체(지급) 내역서'
+}
+
+Ref: sales_record.creator_id > creator_balance.creator_id
+Ref: daily_settlement.creator_id > creator_balance.creator_id
+Ref: balance_ledger.creator_id > creator_balance.creator_id
+Ref: withdrawal_request.creator_id > creator_balance.creator_id
+Ref: settlement_account.creator_id - creator_balance.creator_id
+Ref: payout.withdrawal_request_id - withdrawal_request.id
+Ref: payout.creator_id > creator_balance.creator_id
+Ref: tax_profile.creator_id - creator_balance.creator_id
+Ref: withholding_tax_monthly.creator_id > creator_balance.creator_id
+Ref: reconciliation_mismatch.run_id > reconciliation_run.id
+
+// =====================================================================
+// 모듈 간 ID 참조
+// =====================================================================
+
+Ref: content.creator_id > member.id
+Ref: content_like.member_id > member.id
+Ref: content_access.member_id > member.id
+Ref: content_access.purchase_id > purchase.id
+Ref: membership_plan.creator_id > member.id
+Ref: membership_subscription.member_id > member.id
+Ref: membership_subscription.purchase_id > purchase.id
+Ref: point_wallet.member_id - member.id
+Ref: charge_order.member_id > member.id
+Ref: purchase.buyer_id > member.id
+Ref: purchase.seller_id > member.id
+Ref: sales_record.purchase_id > purchase.id
+Ref: reconciliation_mismatch.purchase_id > purchase.id
+Ref: creator_balance.creator_id - member.id
+
+// =====================================================================
+// 모듈 묶음
+// =====================================================================
+
+TableGroup member [color: #6C63FF] {
+  member
+  creator_profile
+  follow
+  creator_application
+}
+
+TableGroup content [color: #2E9E6B] {
+  category
+  content
+  tag
+  content_tag
+  content_like
+  content_access
+  membership_plan
+  membership_subscription
+}
+
+TableGroup payment [color: #D9822B] {
+  point_wallet
+  charge_order
+  purchase
+  point_transaction
+}
+
+TableGroup settlement [color: #C2416B] {
+  fee_policy
+  hold_policy
+  sales_record
+  daily_settlement
+  creator_balance
+  balance_ledger
+  settlement_account
+  withdrawal_request
+  payout
+  tax_profile
+  tax_policy
+  withholding_tax_monthly
+  reconciliation_run
+  reconciliation_mismatch
+}
