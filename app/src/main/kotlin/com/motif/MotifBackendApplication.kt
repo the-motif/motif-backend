@@ -1,11 +1,11 @@
-package com.creatorledger.platform
+package com.motif
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication
-class PlatformBackendApplication
+class MotifBackendApplication
 
 fun main(args: Array<String>) {
-	runApplication<PlatformBackendApplication>(*args)
+	runApplication<MotifBackendApplication>(*args)
 }

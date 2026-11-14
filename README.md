@@ -1,4 +1,4 @@
-# platform-backend
+# motif-backend
 
 ## 설정 파일
 

@@ -1,8 +1,8 @@
 # 복사용 틀 / application-local.yaml로 복사 후 값 채울 것 (local 파일은 커밋 금지)
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/platform
-    username: platform
+    url: jdbc:mysql://localhost:3306/motif
+    username: motif
     password: change-me
   data:
     redis:

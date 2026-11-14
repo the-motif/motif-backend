@@ -1,6 +1,6 @@
 spring:
   application:
-    name: platform-backend
+    name: motif-backend
   profiles:
     default: local
   jpa:

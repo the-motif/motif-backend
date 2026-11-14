@@ -1,10 +1,10 @@
-package com.creatorledger.platform
+package com.motif
 
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
-class PlatformBackendApplicationTests {
+class MotifBackendApplicationTests {
 
 	@Test
 	fun contextLoads() {
