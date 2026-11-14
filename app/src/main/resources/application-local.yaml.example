@@ -10,5 +10,5 @@ spring:
       port: 6379
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate  # 테이블은 Flyway로만
     show-sql: true
