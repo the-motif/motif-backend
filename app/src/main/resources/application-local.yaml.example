@@ -13,5 +13,7 @@ spring:
       ddl-auto: validate  # 테이블은 Flyway로만
     show-sql: true
 motif:
+  crypto:
+    secret-key: change-me-base64-32-bytes  # Base64 32바이트 / README 참고
   jwt:
     secret: change-me-to-random-32-bytes-or-more  # 32바이트 이상
