@@ -1,0 +1,46 @@
+### 카테고리 목록
+GET {{baseUrl}}/api/categories
+
+### 관리자: 카테고리 추가
+POST {{baseUrl}}/api/admin/categories
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "name": "에세이",
+  "sortOrder": 1
+}
+
+### 창작자: 작성 / 응답 id 저장
+POST {{baseUrl}}/api/creator/contents
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "categoryId": 1,
+  "title": "제주 한 달 살기 기록",
+  "preview": "구매 전 보이는 앞부분",
+  "accessType": "PAID",
+  "price": 1000,
+  "body": "구매자만 보는 본문"
+}
+
+> {% client.global.set("contentId", response.body.id); %}
+
+### 창작자: 발행
+POST {{baseUrl}}/api/creator/contents/{{contentId}}/publish
+Authorization: Bearer {{accessToken}}
+
+### 창작자: 내 글 목록
+GET {{baseUrl}}/api/creator/contents
+Authorization: Bearer {{accessToken}}
+
+### 발행된 글 목록 (비로그인 가능)
+GET {{baseUrl}}/api/contents?page=0&size=20
+
+### 상세 (비로그인이면 유료 본문 null)
+GET {{baseUrl}}/api/contents/{{contentId}}
+
+### 내 서재
+GET {{baseUrl}}/api/library
+Authorization: Bearer {{accessToken}}
