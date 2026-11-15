@@ -16,3 +16,15 @@
 ```bash
 cp app/src/main/resources/application-local.yaml.example app/src/main/resources/application-local.yaml
 ```
+
+`application-local.yaml`의 `motif.jwt.secret`은 32바이트 이상 아무 문자열로 채운다.
+
+## API 확인
+
+| 방법 | 위치 |
+|---|---|
+| Swagger UI | `http://localhost:8080/swagger-ui/index.html` (운영에서는 꺼짐) |
+| IntelliJ HTTP Client | `http/*.http` 열고 ▶ 실행, 환경은 `local` 선택 |
+
+로그인 후 받은 `accessToken`을 Swagger 우측 Authorize에 넣으면 인증 필요한 API도 호출 가능.
+포트를 바꿨다면 `http/http-client.private.env.json`(커밋 안 됨)에 `baseUrl`을 덮어쓴다.

@@ -58,3 +58,6 @@ logs/
 ### OS ###
 .DS_Store
 Thumbs.db
+
+### IntelliJ HTTP Client 개인 설정
+http-client.private.env.json
