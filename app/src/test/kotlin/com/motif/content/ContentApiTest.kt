@@ -43,6 +43,16 @@ class ContentApiTest @Autowired constructor(
     }
 
     @Test
+    fun `기본 카테고리 6개가 순서대로 있음`() {
+        val body = mockMvc.get("/api/categories").andExpect { status { isOk() } }.andReturn().response.contentAsString
+        val names = jsonMapper.readValue(body, List::class.java).map { (it as Map<*, *>)["name"] }
+
+        // 테스트가 만든 카테고리(sortOrder 0)가 앞에 섞여 있을 수 있음 → 기본 카테고리만 골라 순서 확인
+        val defaults = listOf("소설", "만화", "일러스트", "에세이", "지식·정보", "기타")
+        assertThat(names.filter { it in defaults }).containsExactlyElementsOf(defaults)
+    }
+
+    @Test
     fun `카테고리 - 비로그인 목록 조회, 중복 추가 409`() {
         mockMvc.get("/api/categories").andExpect {
             status { isOk() }
