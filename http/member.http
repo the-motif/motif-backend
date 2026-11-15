@@ -1,0 +1,101 @@
+### 회원가입
+POST {{baseUrl}}/api/members
+Content-Type: application/json
+
+{
+  "email": "reader@motif.com",
+  "password": "password123",
+  "nickname": "모티프독자"
+}
+
+### 로그인 / 응답 토큰을 변수에 저장
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "reader@motif.com",
+  "password": "password123"
+}
+
+> {%
+    client.global.set("accessToken", response.body.accessToken);
+    client.global.set("refreshToken", response.body.refreshToken);
+%}
+
+### 내 정보
+GET {{baseUrl}}/api/members/me
+Authorization: Bearer {{accessToken}}
+
+### 토큰 재발급
+POST {{baseUrl}}/api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+> {%
+    client.global.set("accessToken", response.body.accessToken);
+    client.global.set("refreshToken", response.body.refreshToken);
+%}
+
+### 로그아웃
+POST {{baseUrl}}/api/auth/logout
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+### 창작자 전환 신청
+POST {{baseUrl}}/api/creator-applications
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "intro": "여행 에세이를 연재합니다",
+  "portfolioUrl": "https://blog.example.com"
+}
+
+### 내 신청 내역
+GET {{baseUrl}}/api/creator-applications/me
+Authorization: Bearer {{accessToken}}
+
+### 관리자: 심사 중 목록 / ADMIN 계정 토큰 필요
+GET {{baseUrl}}/api/admin/creator-applications?status=REQUESTED&page=0&size=20
+Authorization: Bearer {{accessToken}}
+
+### 관리자: 승인
+POST {{baseUrl}}/api/admin/creator-applications/1/approve
+Authorization: Bearer {{accessToken}}
+
+### 관리자: 반려
+POST {{baseUrl}}/api/admin/creator-applications/1/reject
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "reason": "활동 소개가 부족합니다"
+}
+
+### 회원 탈퇴 / 비밀번호 확인
+POST {{baseUrl}}/api/members/me/withdraw
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "password": "password123"
+}
+
+### 관리자: 회원 정지
+POST {{baseUrl}}/api/admin/members/1/suspend
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "reason": "약관 위반"
+}
+
+### 관리자: 정지 해제
+POST {{baseUrl}}/api/admin/members/1/unsuspend
+Authorization: Bearer {{accessToken}}
