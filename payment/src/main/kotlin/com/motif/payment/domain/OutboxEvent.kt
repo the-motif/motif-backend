@@ -20,6 +20,7 @@ class OutboxEvent(
     aggregateId: Long,
     eventType: String,
     payload: String,
+    traceId: String? = null,
 ) : BaseTimeEntity() {
 
     @Id
@@ -41,6 +42,9 @@ class OutboxEvent(
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(nullable = false, updatable = false)
     val payload: String = payload
+
+    @Column(length = 64, updatable = false)
+    val traceId: String? = traceId
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)

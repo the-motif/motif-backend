@@ -4,6 +4,7 @@ import com.motif.common.exception.BusinessException
 import com.motif.common.lock.RedisDistributedLock
 import com.motif.settlement.domain.CreatorType
 import com.motif.settlement.exception.SettlementErrorCode
+import com.motif.common.trace.TraceId
 import org.slf4j.LoggerFactory
 import org.springframework.jdbc.core.simple.JdbcClient
 import org.springframework.scheduling.annotation.Scheduled
@@ -30,7 +31,7 @@ class WithholdingTaxJob(
     @Scheduled(cron = "\${motif.withholding.cron:0 0 1 1 * *}", zone = "Asia/Seoul")
     fun scheduledRun() {
         try {
-            run(YearMonth.now(clock).minusMonths(1))
+            TraceId.run("withholding") { run(YearMonth.now(clock).minusMonths(1)) }
         } catch (e: BusinessException) {
             log.info("원천세 집계 건너뜀: {}", e.message)
         }

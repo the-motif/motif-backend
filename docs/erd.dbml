@@ -517,6 +517,7 @@ Table outbox_event {
   aggregate_id bigint [not null]
   event_type varchar(50) [not null, note: 'PURCHASE_COMPLETED / PURCHASE_REFUNDED']
   payload json [not null]
+  trace_id varchar(64) [note: '이벤트를 만든 요청의 추적 ID / 발행·수신 로그 연결']
   status outbox_status [not null, default: 'PENDING']
   retry_count int [not null, default: 0]
   published_at datetime

@@ -5,6 +5,7 @@ import com.motif.common.lock.RedisDistributedLock
 import com.motif.settlement.exception.SettlementErrorCode
 import com.motif.settlement.repository.SalesSummary
 import com.motif.settlement.repository.SettlementJdbcRepository
+import com.motif.common.trace.TraceId
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
@@ -29,7 +30,7 @@ class DailySettlementJob(
     @Scheduled(cron = "\${motif.settlement.daily-cron:0 10 0 * * *}", zone = "Asia/Seoul")
     fun scheduledRun() {
         try {
-            run(LocalDate.now(clock))
+            TraceId.run("settle") { run(LocalDate.now(clock)) }
         } catch (e: BusinessException) {
             log.info("일일 정산 건너뜀: {}", e.message)
         }

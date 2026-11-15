@@ -1,0 +1,3 @@
+### 추적 ID 확인 (응답 헤더 X-Request-Id, 에러 본문 traceId)
+GET {{baseUrl}}/api/members/me
+X-Request-Id: ios-7f3a9c21

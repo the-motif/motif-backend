@@ -2,6 +2,7 @@ package com.motif.payment.outbox
 
 import com.motif.common.event.PurchaseCompletedEvent
 import com.motif.common.event.PurchaseRefundedEvent
+import com.motif.common.trace.TraceId
 import com.motif.payment.domain.OutboxEvent
 import com.motif.payment.repository.OutboxEventRepository
 import org.slf4j.LoggerFactory
@@ -34,7 +35,7 @@ class OutboxRelay(
 
     @Scheduled(fixedDelayString = "\${motif.outbox.relay-delay-ms:1000}")
     fun scheduledRelay() {
-        relayPending()
+        TraceId.run("outbox") { relayPending() }
     }
 
     // 발행한 건수 반환
@@ -46,7 +47,10 @@ class OutboxRelay(
             tx.execute {
                 // 다른 서버가 잡은 행은 건너뜀
                 val event = outboxEventRepository.findPendingByIdForUpdate(id) ?: return@execute false
-                eventPublisher.publishEvent(toEvent(event))
+                // 원래 요청의 추적 ID로 리스너 실행 → 구매 요청부터 정산 원장까지 같은 ID
+                TraceId.open(event.traceId ?: TraceId.current() ?: TraceId.newId()).use {
+                    eventPublisher.publishEvent(toEvent(event))
+                }
                 event.markPublished(LocalDateTime.now(clock))
                 true
             } == true
