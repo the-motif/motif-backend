@@ -13,6 +13,9 @@ spring:
       ddl-auto: validate
     show-sql: false
 motif:
+  admin:  # 비우면 생성 안 함
+    email: ${ADMIN_EMAIL:}
+    password: ${ADMIN_PASSWORD:}
   crypto:
     secret-key: ${CRYPTO_SECRET_KEY}
   jwt:
