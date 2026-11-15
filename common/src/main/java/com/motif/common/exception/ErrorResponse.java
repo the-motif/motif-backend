@@ -1,4 +1,4 @@
-package com.creatorledger.platform.common.exception;
+package com.motif.common.exception;
 
 import java.util.List;
 

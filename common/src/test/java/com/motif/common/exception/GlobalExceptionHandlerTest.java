@@ -1,4 +1,4 @@
-package com.creatorledger.platform.common.exception;
+package com.motif.common.exception;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
