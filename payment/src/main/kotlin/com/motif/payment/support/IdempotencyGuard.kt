@@ -6,7 +6,7 @@ import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Component
 import java.time.Duration
 
-// 멱등 키 1차 방어 (Redis) / 2차는 DB 유니크 제약
+// 멱등 키 Redis 검사 / DB 유니크 제약과 이중 방어
 // 흐름: 이미 끝난 요청이면 DB 결과 반환 → 처리 중이면 409 → 처음이면 선점 후 실행
 @Component
 class IdempotencyGuard(

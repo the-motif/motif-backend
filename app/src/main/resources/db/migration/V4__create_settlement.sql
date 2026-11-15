@@ -1,4 +1,4 @@
--- settlement 모듈 1차 / 출금·지급·세금·대사는 다음 단계
+-- settlement 모듈 정산 테이블 / 기본 수수료·보류 정책 포함
 
 CREATE TABLE fee_policy (
     id             BIGINT        NOT NULL AUTO_INCREMENT,

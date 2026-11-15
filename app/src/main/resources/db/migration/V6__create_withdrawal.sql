@@ -1,4 +1,4 @@
--- 정산 계좌·세금 정보·출금·지급 / 월별 원천세 집계·대사는 다음 단계
+-- 정산 계좌·세금 정보·출금·지급
 
 CREATE TABLE settlement_account (
     id             BIGINT       NOT NULL AUTO_INCREMENT,

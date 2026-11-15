@@ -1,4 +1,4 @@
--- payment 모듈 1차 / point_grant·coupon·member_coupon은 2차
+-- payment 모듈 테이블
 
 CREATE TABLE point_wallet (
     id           BIGINT      NOT NULL AUTO_INCREMENT,
@@ -93,7 +93,7 @@ CREATE TABLE purchase (
     target_id         BIGINT       NOT NULL,
     list_price        BIGINT       NOT NULL COMMENT '정가 스냅샷 / 정산 기준',
     coupon_discount   BIGINT       NOT NULL DEFAULT 0,
-    member_coupon_id  BIGINT       NULL COMMENT '2차 coupon',
+    member_coupon_id  BIGINT       NULL COMMENT 'member_coupon.id',
     paid_point_amount BIGINT       NOT NULL,
     free_point_amount BIGINT       NOT NULL DEFAULT 0,
     message           VARCHAR(200) NULL,

@@ -16,7 +16,7 @@ import tools.jackson.databind.json.JsonMapper
 import java.time.Clock
 import java.time.LocalDateTime
 
-// PENDING 이벤트를 Spring 이벤트로 발행 / 2단계에서 Kafka 발행으로 교체
+// PENDING 이벤트를 Spring 이벤트로 발행
 // 이벤트 1건 = 트랜잭션 1개 / 리스너가 같은 트랜잭션에 참여 → 리스너 저장과 PUBLISHED가 함께 커밋
 @Component
 class OutboxRelay(

@@ -54,7 +54,7 @@ class PurchaseService(
         val now = LocalDateTime.now(clock)
         val price = sale.price
         val walletId = walletService.getOrCreate(buyerId).id!!
-        // 1차는 유상 포인트만 (무상은 2차)
+        // 유상 포인트만 차감
         if (walletRepository.decreasePaid(walletId, price, now) == 0) {
             throw BusinessException(PaymentErrorCode.INSUFFICIENT_BALANCE)
         }

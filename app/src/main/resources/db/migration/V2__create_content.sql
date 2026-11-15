@@ -1,4 +1,4 @@
--- content 모듈 1차 / tag·content_tag·content_like는 2차
+-- content 모듈 테이블
 
 CREATE TABLE category (
     id         BIGINT      NOT NULL AUTO_INCREMENT,
