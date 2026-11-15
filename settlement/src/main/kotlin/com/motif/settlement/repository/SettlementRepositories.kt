@@ -22,6 +22,11 @@ interface SalesRecordRepository : JpaRepository<SalesRecord, Long> {
     fun findByPurchaseIdAndType(purchaseId: Long, type: SalesType): SalesRecord?
 
     fun findAllByCreatorIdOrderByIdDesc(creatorId: Long, pageable: Pageable): Slice<SalesRecord>
+
+    @Query("select s from SalesRecord s where s.occurredAt >= :from and s.occurredAt < :to")
+    fun findAllOccurredBetween(@Param("from") from: LocalDateTime, @Param("to") to: LocalDateTime): List<SalesRecord>
+
+    fun findAllByPurchaseIdIn(purchaseIds: Collection<Long>): List<SalesRecord>
 }
 
 interface DailySettlementRepository : JpaRepository<DailySettlement, Long> {

@@ -15,6 +15,7 @@ import java.time.LocalDateTime
 
 // 일일 정산 / 정산일 D = D 0시 전에 일어난 미정산 판매·환불
 // 순서: 락 → 판매 묶기(SQL) → 집계(SQL) → 창작자별 계산·저장(트랜잭션 각각)
+// 대사 미해결 창작자는 판매 묶기·정산 모두 건너뜀 (보류금 해제·이월은 다음 정산에서)
 @Service
 class DailySettlementJob(
     private val distributedLock: RedisDistributedLock,
@@ -50,11 +51,13 @@ class DailySettlementJob(
 
     private fun execute(settlementDate: LocalDate): DailySettlementRunResult {
         val now = LocalDateTime.now(clock)
+        val held = settlementJdbcRepository.creatorsOnHold()
         val assigned = settlementJdbcRepository.assignUnsettled(settlementDate, now)
         val sales = settlementJdbcRepository.salesSummaries(settlementDate)
         val creators = sales.keys +
             settlementJdbcRepository.creatorsWithReleasableHold(settlementDate) +
-            settlementJdbcRepository.creatorsWithNegativeCarry(settlementDate)
+            settlementJdbcRepository.creatorsWithNegativeCarry(settlementDate) -
+            held
         val holdPolicy = settlementJdbcRepository.holdPolicy(now)
 
         var settled = 0
@@ -70,8 +73,11 @@ class DailySettlementJob(
                 failed += creatorId
             }
         }
-        log.info("일일 정산 date={} 판매묶음={} 정산={} 건너뜀={} 실패={}", settlementDate, assigned, settled, skipped, failed.size)
-        return DailySettlementRunResult(settlementDate, assigned, settled, skipped, failed)
+        log.info(
+            "일일 정산 date={} 판매묶음={} 정산={} 건너뜀={} 실패={} 대사보류={}",
+            settlementDate, assigned, settled, skipped, failed.size, held.size,
+        )
+        return DailySettlementRunResult(settlementDate, assigned, settled, skipped, failed, held.sorted())
     }
 
     companion object {
@@ -85,4 +91,5 @@ data class DailySettlementRunResult(
     val settledCreatorCount: Int,
     val skippedCreatorCount: Int,
     val failedCreatorIds: List<Long>,
+    val heldCreatorIds: List<Long> = emptyList(),
 )

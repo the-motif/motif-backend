@@ -1,6 +1,7 @@
 dependencies {
     implementation(project(":common"))
     implementation(project(":member"))
+    implementation(project(":payment"))
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-security")

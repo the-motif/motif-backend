@@ -97,6 +97,12 @@ interface PurchaseRepository : JpaRepository<Purchase, Long> {
     fun findByIdForUpdate(@Param("id") id: Long): Purchase?
 
     fun findAllByBuyerIdOrderByIdDesc(buyerId: Long, pageable: Pageable): Slice<Purchase>
+
+    @Query("select p from Purchase p where p.createdAt >= :from and p.createdAt < :to")
+    fun findAllCreatedBetween(@Param("from") from: LocalDateTime, @Param("to") to: LocalDateTime): List<Purchase>
+
+    @Query("select p from Purchase p where p.refundedAt >= :from and p.refundedAt < :to")
+    fun findAllRefundedBetween(@Param("from") from: LocalDateTime, @Param("to") to: LocalDateTime): List<Purchase>
 }
 
 interface PointTransactionRepository : JpaRepository<PointTransaction, Long> {

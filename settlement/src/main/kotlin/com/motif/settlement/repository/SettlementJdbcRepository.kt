@@ -13,6 +13,7 @@ class SettlementJdbcRepository(
 ) {
 
     // 미정산 판매를 이번 정산일로 묶음 / 이미 정산 끝난 창작자는 제외 (재실행 때 늦은 이벤트가 끼지 않게)
+    // 대사 미해결 창작자도 제외 → 해결 뒤 정산일에 포함
     fun assignUnsettled(settlementDate: LocalDate, now: LocalDateTime): Int =
         jdbc.sql(
             """
@@ -20,6 +21,7 @@ class SettlementJdbcRepository(
             WHERE settlement_date IS NULL
               AND occurred_at < :cutoff
               AND creator_id NOT IN (SELECT creator_id FROM daily_settlement WHERE settlement_date = :date)
+              AND creator_id NOT IN (SELECT creator_id FROM reconciliation_mismatch WHERE resolved_at IS NULL)
             """,
         )
             .param("date", settlementDate)
@@ -45,6 +47,12 @@ class SettlementJdbcRepository(
             }
             .list()
             .associateBy { it.creatorId }
+
+    // 대사 미해결 불일치가 있는 창작자 / 정산 보류
+    fun creatorsOnHold(): Set<Long> =
+        jdbc.sql("SELECT DISTINCT creator_id FROM reconciliation_mismatch WHERE resolved_at IS NULL")
+            .query { rs, _ -> rs.getLong(1) }
+            .set()
 
     // 오늘 풀 보류금이 있는 창작자
     fun creatorsWithReleasableHold(settlementDate: LocalDate): Set<Long> =
