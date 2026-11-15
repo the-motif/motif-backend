@@ -1,0 +1,59 @@
+### 내 포인트 잔액 (member.http 로그인 먼저)
+GET {{baseUrl}}/api/points/me
+Authorization: Bearer {{accessToken}}
+
+### 충전 1단계: 주문 생성 / 응답 orderNo 저장
+POST {{baseUrl}}/api/charges
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+Idempotency-Key: {{$random.uuid}}
+
+{
+  "amount": 10000
+}
+
+> {%
+    client.global.set("orderNo", response.body.orderNo);
+%}
+
+### 충전 2단계: 승인 (모의 PG / paymentKey가 fail로 시작하면 실패)
+POST {{baseUrl}}/api/charges/confirm
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "orderNo": "{{orderNo}}",
+  "paymentKey": "fake-{{$random.uuid}}",
+  "amount": 10000
+}
+
+### 포인트 내역
+GET {{baseUrl}}/api/points/me/history?page=0&size=20
+Authorization: Bearer {{accessToken}}
+
+### 콘텐츠 구매 / contentId는 content.http에서 만든 글
+POST {{baseUrl}}/api/purchases
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+Idempotency-Key: {{$random.uuid}}
+
+{
+  "contentId": 1
+}
+
+> {%
+    client.global.set("purchaseId", response.body.purchaseId);
+%}
+
+### 내 구매 내역
+GET {{baseUrl}}/api/purchases/me
+Authorization: Bearer {{accessToken}}
+
+### 환불 (본문 열람 전 + 7일 이내)
+POST {{baseUrl}}/api/purchases/{{purchaseId}}/refund
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "reason": "잘못 구매"
+}
