@@ -1,0 +1,4305 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Motif API",
+    "version": "v1"
+  },
+  "security": [
+    {
+      "bearer": []
+    }
+  ],
+  "paths": {
+    "/api/creator/tax-profile": {
+      "put": {
+        "tags": [
+          "출금 (창작자)"
+        ],
+        "summary": "세금 정보 등록·변경",
+        "description": "개인 = 주민등록번호(3.3% 원천징수), 사업자 = 사업자등록번호",
+        "operationId": "saveTaxProfile",
+        "parameters": [
+          {
+            "name": "creatorId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaxProfileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettlementInfoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/creator/settlement-account": {
+      "put": {
+        "tags": [
+          "출금 (창작자)"
+        ],
+        "summary": "정산 계좌 등록·변경",
+        "description": "변경하면 다시 확인 대기(PENDING)",
+        "operationId": "saveAccount",
+        "parameters": [
+          {
+            "name": "creatorId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SettlementAccountRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettlementInfoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/creator/contents/{id}": {
+      "put": {
+        "tags": [
+          "창작자: 콘텐츠 관리"
+        ],
+        "summary": "수정",
+        "description": "발행 후에도 가능 / 이미 팔린 건은 판매 시점 가격 유지",
+        "operationId": "update",
+        "parameters": [
+          {
+            "name": "creatorId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContentSaveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/purchases": {
+      "post": {
+        "tags": [
+          "구매"
+        ],
+        "summary": "콘텐츠 구매",
+        "description": "포인트 차감 + 열람 권한 / 같은 Idempotency-Key 재요청은 같은 결과",
+        "operationId": "purchase",
+        "parameters": [
+          {
+            "name": "memberId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "요청마다 새 UUID / 재시도는 같은 값",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 64,
+              "minLength": 8
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseContentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/purchases/{id}/refund": {
+      "post": {
+        "tags": [
+          "구매"
+        ],
+        "summary": "구매 환불",
+        "description": "본문 열람 전 + 구매 후 7일 이내",
+        "operationId": "refund",
+        "parameters": [
+          {
+            "name": "memberId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefundRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/members": {
+      "post": {
+        "tags": [
+          "회원"
+        ],
+        "summary": "회원가입",
+        "description": "가입 시 역할 READER",
+        "operationId": "signup",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/members/me/withdraw": {
+      "post": {
+        "tags": [
+          "회원"
+        ],
+        "summary": "회원 탈퇴",
+        "description": "비밀번호 확인 / 모든 기기 로그아웃 / 같은 이메일 재가입 불가",
+        "operationId": "withdraw",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithdrawRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/creator/withdrawals": {
+      "get": {
+        "tags": [
+          "출금 (창작자)"
+        ],
+        "summary": "내 출금 내역",
+        "description": "최신순, 지급 정보(세금·실지급액) 포함",
+        "operationId": "list",
+        "parameters": [
+          {
+            "name": "creatorId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SliceResponseWithdrawalResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "출금 (창작자)"
+        ],
+        "summary": "출금 신청",
+        "description": "10,000원 이상 / 신청 즉시 출금 가능 금액에서 차감",
+        "operationId": "request",
+        "parameters": [
+          {
+            "name": "creatorId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "요청마다 새 UUID / 재시도는 같은 값",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 64,
+              "minLength": 8
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithdrawalCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WithdrawalResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/creator/contents": {
+      "get": {
+        "tags": [
+          "창작자: 콘텐츠 관리"
+        ],
+        "summary": "내 콘텐츠 목록",
+        "description": "모든 상태 / 최신 작성순",
+        "operationId": "myContents",
+        "parameters": [
+          {
+            "name": "creatorId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SliceResponseContentSummaryResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "창작자: 콘텐츠 관리"
+        ],
+        "summary": "작성 (임시저장)",
+        "description": "DRAFT로 생성 / PAID는 100~1,000,000 포인트",
+        "operationId": "create",
+        "parameters": [
+          {
+            "name": "creatorId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContentSaveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/creator/contents/{id}/publish": {
+      "post": {
+        "tags": [
+          "창작자: 콘텐츠 관리"
+        ],
+        "summary": "발행",
+        "operationId": "publish",
+        "parameters": [
+          {
+            "name": "creatorId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/creator-applications": {
+      "post": {
+        "tags": [
+          "창작자 전환"
+        ],
+        "summary": "창작자 전환 신청",
+        "description": "READER만 / 심사 중 신청은 1개만",
+        "operationId": "apply",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatorApplyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatorApplicationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/charges": {
+      "post": {
+        "tags": [
+          "포인트"
+        ],
+        "summary": "충전 요청 (1단계)",
+        "description": "orderNo 발급 → 앱이 PG 결제창 호출 / 1,000~1,000,000원, 100원 단위",
+        "operationId": "requestCharge",
+        "parameters": [
+          {
+            "name": "memberId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "요청마다 새 UUID / 재시도는 같은 값",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 64,
+              "minLength": 8
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChargeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChargeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/charges/confirm": {
+      "post": {
+        "tags": [
+          "포인트"
+        ],
+        "summary": "충전 승인 (2단계)",
+        "description": "PG 결제창에서 받은 paymentKey로 승인 / 모의 PG: paymentKey가 fail로 시작하면 실패",
+        "operationId": "confirmCharge",
+        "parameters": [
+          {
+            "name": "memberId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChargeConfirmRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChargeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/refresh": {
+      "post": {
+        "tags": [
+          "인증"
+        ],
+        "summary": "토큰 재발급",
+        "description": "쓴 리프레시 토큰은 폐기",
+        "operationId": "refresh",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "tags": [
+          "인증"
+        ],
+        "summary": "로그아웃",
+        "description": "리프레시 토큰 폐기",
+        "operationId": "logout",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": [
+          "인증"
+        ],
+        "summary": "로그인",
+        "description": "액세스 토큰(30분) + 리프레시 토큰(14일) 발급",
+        "operationId": "login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/withholding-taxes/run": {
+      "post": {
+        "tags": [
+          "원천세 (관리자)"
+        ],
+        "summary": "월 집계 실행",
+        "description": "지난 달만 / 다시 돌려도 같은 결과",
+        "operationId": "run",
+        "parameters": [
+          {
+            "name": "month",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-10"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WithholdingTaxRunResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/withdrawals/{id}/reject": {
+      "post": {
+        "tags": [
+          "출금 (관리자)"
+        ],
+        "summary": "출금 반려",
+        "description": "금액은 출금 가능 금액으로 복구",
+        "operationId": "reject",
+        "parameters": [
+          {
+            "name": "adminId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WithdrawalResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/withdrawals/{id}/approve": {
+      "post": {
+        "tags": [
+          "출금 (관리자)"
+        ],
+        "summary": "출금 승인 → 송금",
+        "description": "원천징수 계산 후 송금 / 일시 오류면 payout PENDING (자동·수동 재시도)",
+        "operationId": "approve",
+        "parameters": [
+          {
+            "name": "adminId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WithdrawalResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/settlements/daily/run": {
+      "post": {
+        "tags": [
+          "정산 (관리자)"
+        ],
+        "summary": "일일 정산 수동 실행",
+        "description": "재실행 안전 (이미 정산한 창작자는 건너뜀) / 미래 날짜 불가",
+        "operationId": "run_1",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DailySettlementRunResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/reconciliations/run": {
+      "post": {
+        "tags": [
+          "정산 대사 (관리자)"
+        ],
+        "summary": "대사 수동 실행",
+        "description": "지난 날짜만 / 다시 돌리면 attempt 증가, 이전 미해결 건은 자동으로 닫힘",
+        "operationId": "run_2",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReconciliationRunResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/reconciliations/mismatches/{id}/resolve": {
+      "post": {
+        "tags": [
+          "정산 대사 (관리자)"
+        ],
+        "summary": "불일치 해결 처리",
+        "description": "원인 조치 후 메모와 함께 닫음 → 다음 일일 정산부터 보류 해제",
+        "operationId": "resolve",
+        "parameters": [
+          {
+            "name": "adminId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveMismatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MismatchResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/reconciliations/mismatches/{id}/republish": {
+      "post": {
+        "tags": [
+          "정산 대사 (관리자)"
+        ],
+        "summary": "불일치 구매의 이벤트 재발행",
+        "description": "결제 이벤트를 다시 보냄 (원장에 없음·환불 누락용) → 1초 뒤 대사 재실행하면 자동 해결",
+        "operationId": "republish",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RepublishResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/payouts/{id}/retry": {
+      "post": {
+        "tags": [
+          "출금 (관리자)"
+        ],
+        "summary": "지급 재시도",
+        "description": "PENDING(일시 오류)만 / 같은 payoutNo로 송금",
+        "operationId": "retry",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PayoutResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/outbox-events/{id}/requeue": {
+      "post": {
+        "tags": [
+          "이벤트 (관리자)"
+        ],
+        "summary": "이벤트 재발행",
+        "description": "PENDING으로 되돌림 → 1초 안에 발행 / 받는 쪽이 중복을 거르므로 안전",
+        "operationId": "requeue",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutboxEventResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/members/{id}/unsuspend": {
+      "post": {
+        "tags": [
+          "관리자: 회원"
+        ],
+        "summary": "정지 해제",
+        "operationId": "unsuspend",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminMemberResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/members/{id}/suspend": {
+      "post": {
+        "tags": [
+          "관리자: 회원"
+        ],
+        "summary": "회원 정지",
+        "description": "모든 기기 로그아웃, 남은 액세스 토큰 즉시 차단",
+        "operationId": "suspend",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SuspendRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminMemberResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/fee-policies": {
+      "get": {
+        "tags": [
+          "수수료 정책 (관리자)"
+        ],
+        "summary": "수수료 정책 이력",
+        "description": "creatorId 없으면 기본 요율 이력 / 최신순",
+        "operationId": "history",
+        "parameters": [
+          {
+            "name": "creatorId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FeePolicyResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "수수료 정책 (관리자)"
+        ],
+        "summary": "수수료 정책 추가",
+        "description": "creatorId 있으면 창작자 계약 요율, 없으면 기본 요율 / 판매 시각 기준 적용, 소급 안 함",
+        "operationId": "create_1",
+        "parameters": [
+          {
+            "name": "adminId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeePolicyCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeePolicyResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/fee-policies/{id}/end": {
+      "post": {
+        "tags": [
+          "수수료 정책 (관리자)"
+        ],
+        "summary": "창작자 계약 요율 종료",
+        "description": "종료 시각부터 기본 요율 / 기본 요율은 종료 불가",
+        "operationId": "end",
+        "parameters": [
+          {
+            "name": "adminId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeePolicyEndRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeePolicyResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/creators/{creatorId}/tax-profile/review": {
+      "post": {
+        "tags": [
+          "출금 (관리자)"
+        ],
+        "summary": "세금 정보 확인",
+        "operationId": "reviewTaxProfile",
+        "parameters": [
+          {
+            "name": "creatorId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettlementInfoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/creators/{creatorId}/settlement-account/review": {
+      "post": {
+        "tags": [
+          "출금 (관리자)"
+        ],
+        "summary": "정산 계좌 확인",
+        "description": "approved=false면 REJECTED",
+        "operationId": "reviewAccount",
+        "parameters": [
+          {
+            "name": "creatorId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettlementInfoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/creator-applications/{id}/reject": {
+      "post": {
+        "tags": [
+          "관리자: 창작자 심사"
+        ],
+        "summary": "반려",
+        "operationId": "reject_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatorRejectRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatorApplicationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/creator-applications/{id}/approve": {
+      "post": {
+        "tags": [
+          "관리자: 창작자 심사"
+        ],
+        "summary": "승인",
+        "description": "회원 역할 CREATOR, 창작자 프로필 생성 / 새 역할은 토큰 재발급 후 반영",
+        "operationId": "approve_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatorApplicationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/categories": {
+      "post": {
+        "tags": [
+          "카테고리"
+        ],
+        "summary": "관리자: 카테고리 추가",
+        "operationId": "create_2",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CategoryCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/purchases/me": {
+      "get": {
+        "tags": [
+          "구매"
+        ],
+        "summary": "내 구매 내역",
+        "description": "최신순",
+        "operationId": "myPurchases",
+        "parameters": [
+          {
+            "name": "memberId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SliceResponsePurchaseResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/points/me": {
+      "get": {
+        "tags": [
+          "포인트"
+        ],
+        "summary": "내 포인트 잔액",
+        "operationId": "balance",
+        "parameters": [
+          {
+            "name": "memberId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WalletResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/points/me/history": {
+      "get": {
+        "tags": [
+          "포인트"
+        ],
+        "summary": "포인트 내역",
+        "description": "최신순",
+        "operationId": "history_1",
+        "parameters": [
+          {
+            "name": "memberId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SliceResponsePointHistoryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/members/me": {
+      "get": {
+        "tags": [
+          "회원"
+        ],
+        "summary": "내 정보 조회",
+        "operationId": "me",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/library": {
+      "get": {
+        "tags": [
+          "콘텐츠"
+        ],
+        "summary": "내 서재",
+        "description": "열람 권한 있는 콘텐츠 / 최근 구매순",
+        "operationId": "library",
+        "parameters": [
+          {
+            "name": "memberId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SliceResponseContentSummaryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/creator/withholding-taxes": {
+      "get": {
+        "tags": [
+          "원천세 (창작자)"
+        ],
+        "summary": "내 원천징수 내역",
+        "description": "연도별 월 합계 / 종합소득세 신고 참고용",
+        "operationId": "mine",
+        "parameters": [
+          {
+            "name": "creatorId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "maximum": 2100,
+              "minimum": 2020
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WithholdingTaxRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/creator/settlements/sales": {
+      "get": {
+        "tags": [
+          "정산 (창작자)"
+        ],
+        "summary": "판매·환불 내역",
+        "description": "최신순 / settlementDate null이면 아직 정산 전",
+        "operationId": "sales",
+        "parameters": [
+          {
+            "name": "creatorId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SliceResponseSalesRecordResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/creator/settlements/fee-rates": {
+      "get": {
+        "tags": [
+          "정산 (창작자)"
+        ],
+        "summary": "내 수수료율",
+        "description": "판매 유형별 지금 적용 요율 / source CONTRACT 계약, DEFAULT 기본",
+        "operationId": "myRates",
+        "parameters": [
+          {
+            "name": "creatorId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AppliedFeeRateResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/creator/settlements/daily": {
+      "get": {
+        "tags": [
+          "정산 (창작자)"
+        ],
+        "summary": "일별 정산 내역",
+        "description": "최신순",
+        "operationId": "daily",
+        "parameters": [
+          {
+            "name": "creatorId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 30,
+              "maximum": 100,
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SliceResponseDailySettlementResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/creator/settlements/balance": {
+      "get": {
+        "tags": [
+          "정산 (창작자)"
+        ],
+        "summary": "내 정산 잔액",
+        "description": "available 출금 가능 / held 보류 중",
+        "operationId": "balance_1",
+        "parameters": [
+          {
+            "name": "creatorId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatorBalanceResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/creator/settlement-info": {
+      "get": {
+        "tags": [
+          "출금 (창작자)"
+        ],
+        "summary": "내 정산 정보",
+        "description": "번호는 뒤 4자리만 / withdrawable = 둘 다 확인 완료",
+        "operationId": "info",
+        "parameters": [
+          {
+            "name": "creatorId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettlementInfoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/creator-applications/me": {
+      "get": {
+        "tags": [
+          "창작자 전환"
+        ],
+        "summary": "내 신청 내역",
+        "description": "최신순",
+        "operationId": "myApplications",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CreatorApplicationResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/contents": {
+      "get": {
+        "tags": [
+          "콘텐츠"
+        ],
+        "summary": "발행된 콘텐츠 목록",
+        "description": "최신 발행순 / 로그인 불필요",
+        "operationId": "contents",
+        "parameters": [
+          {
+            "name": "categoryId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SliceResponseContentSummaryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/contents/{id}": {
+      "get": {
+        "tags": [
+          "콘텐츠"
+        ],
+        "summary": "콘텐츠 상세",
+        "description": "무료·구매·작성자면 본문 포함, 아니면 body null",
+        "operationId": "detail",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "viewerId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/categories": {
+      "get": {
+        "tags": [
+          "카테고리"
+        ],
+        "summary": "카테고리 목록",
+        "description": "로그인 불필요",
+        "operationId": "categories",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CategoryResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/withholding-taxes": {
+      "get": {
+        "tags": [
+          "원천세 (관리자)"
+        ],
+        "summary": "월 집계 조회",
+        "description": "신고용 합계 + 창작자별 행",
+        "operationId": "month",
+        "parameters": [
+          {
+            "name": "month",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-10"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WithholdingTaxMonthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/withdrawals": {
+      "get": {
+        "tags": [
+          "출금 (관리자)"
+        ],
+        "summary": "출금 신청 목록",
+        "description": "오래된 순",
+        "operationId": "list_1",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "REQUESTED",
+              "enum": [
+                "REQUESTED",
+                "APPROVED",
+                "REJECTED",
+                "PAID",
+                "FAILED"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50,
+              "maximum": 100,
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SliceResponseWithdrawalResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/reconciliations": {
+      "get": {
+        "tags": [
+          "정산 대사 (관리자)"
+        ],
+        "summary": "날짜별 대사 실행 이력",
+        "description": "최신 attempt 먼저",
+        "operationId": "runs",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReconciliationRunResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/reconciliations/{runId}/mismatches": {
+      "get": {
+        "tags": [
+          "정산 대사 (관리자)"
+        ],
+        "summary": "실행별 불일치",
+        "operationId": "mismatchesOfRun",
+        "parameters": [
+          {
+            "name": "runId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MismatchResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/reconciliations/mismatches": {
+      "get": {
+        "tags": [
+          "정산 대사 (관리자)"
+        ],
+        "summary": "불일치 목록",
+        "description": "resolved=false(기본) 미해결 = 정산 보류 중",
+        "operationId": "mismatches",
+        "parameters": [
+          {
+            "name": "resolved",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50,
+              "maximum": 100,
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SliceResponseMismatchResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/outbox-events": {
+      "get": {
+        "tags": [
+          "이벤트 (관리자)"
+        ],
+        "summary": "이벤트 목록",
+        "description": "기본 FAILED (재시도 5번 실패)",
+        "operationId": "list_2",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "FAILED",
+              "enum": [
+                "PENDING",
+                "PUBLISHED",
+                "FAILED"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50,
+              "maximum": 100,
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SliceResponseOutboxEventResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/fee-policies/applied": {
+      "get": {
+        "tags": [
+          "수수료 정책 (관리자)"
+        ],
+        "summary": "창작자에게 지금 적용되는 요율",
+        "operationId": "applied",
+        "parameters": [
+          {
+            "name": "creatorId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AppliedFeeRateResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/creators/{creatorId}/settlement-info": {
+      "get": {
+        "tags": [
+          "출금 (관리자)"
+        ],
+        "summary": "창작자 정산 정보",
+        "operationId": "info_1",
+        "parameters": [
+          {
+            "name": "creatorId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettlementInfoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/creator-applications": {
+      "get": {
+        "tags": [
+          "관리자: 창작자 심사"
+        ],
+        "summary": "신청 목록",
+        "description": "오래된 순 / page는 0부터",
+        "operationId": "applications",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "REQUESTED",
+              "enum": [
+                "REQUESTED",
+                "APPROVED",
+                "REJECTED"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CreatorApplicationResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "TaxProfileRequest": {
+        "type": "object",
+        "properties": {
+          "creatorType": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "INDIVIDUAL",
+              "BUSINESS"
+            ]
+          },
+          "legalName": {
+            "type": "string",
+            "description": "실명 또는 상호",
+            "example": "홍길동",
+            "maxLength": 50,
+            "minLength": 0
+          },
+          "residentNo": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "개인만 / 숫자 13자리",
+            "example": "9001011234567",
+            "pattern": "^[0-9]{13}$"
+          },
+          "businessNo": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "사업자만 / 숫자 10자리",
+            "example": "1234567890",
+            "pattern": "^[0-9]{10}$"
+          }
+        },
+        "required": [
+          "creatorType",
+          "legalName"
+        ]
+      },
+      "AccountView": {
+        "type": "object",
+        "properties": {
+          "bankCode": {
+            "type": "string"
+          },
+          "accountNumber": {
+            "type": "string"
+          },
+          "holderName": {
+            "type": "string"
+          },
+          "verifyStatus": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "VERIFIED",
+              "REJECTED"
+            ]
+          }
+        }
+      },
+      "SettlementInfoResponse": {
+        "type": "object",
+        "properties": {
+          "account": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AccountView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "taxProfile": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/TaxProfileView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "withdrawable": {
+            "type": "boolean"
+          }
+        }
+      },
+      "TaxProfileView": {
+        "type": "object",
+        "properties": {
+          "creatorType": {
+            "type": "string",
+            "enum": [
+              "INDIVIDUAL",
+              "BUSINESS"
+            ]
+          },
+          "legalName": {
+            "type": "string"
+          },
+          "idNumber": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "verifyStatus": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "VERIFIED",
+              "REJECTED"
+            ]
+          }
+        }
+      },
+      "SettlementAccountRequest": {
+        "type": "object",
+        "properties": {
+          "bankCode": {
+            "type": "string",
+            "example": "004",
+            "pattern": "^[0-9]{3}$"
+          },
+          "accountNumber": {
+            "type": "string",
+            "description": "숫자만",
+            "example": "12345678901234",
+            "pattern": "^[0-9]{10,16}$"
+          },
+          "holderName": {
+            "type": "string",
+            "example": "홍길동",
+            "maxLength": 50,
+            "minLength": 0
+          }
+        },
+        "required": [
+          "holderName"
+        ]
+      },
+      "ContentSaveRequest": {
+        "type": "object",
+        "properties": {
+          "categoryId": {
+            "type": "integer",
+            "format": "int64",
+            "example": 1
+          },
+          "title": {
+            "type": "string",
+            "example": "제주 한 달 살기 기록",
+            "maxLength": 100,
+            "minLength": 0
+          },
+          "preview": {
+            "type": "string",
+            "example": "구매 전 보이는 앞부분",
+            "maxLength": 5000,
+            "minLength": 0
+          },
+          "thumbnailUrl": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 0
+          },
+          "accessType": {
+            "type": "string",
+            "enum": [
+              "FREE",
+              "PAID",
+              "MEMBERSHIP"
+            ],
+            "example": "PAID"
+          },
+          "price": {
+            "type": "integer",
+            "format": "int64",
+            "example": 1000,
+            "minimum": 0
+          },
+          "body": {
+            "type": "string",
+            "example": "구매자만 보는 본문",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "accessType",
+          "body",
+          "categoryId",
+          "title"
+        ]
+      },
+      "ContentDetailResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "creatorId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "creatorNickname": {
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "title": {
+            "type": "string"
+          },
+          "preview": {
+            "type": "string"
+          },
+          "thumbnailUrl": {
+            "type": "string"
+          },
+          "accessType": {
+            "type": "string",
+            "enum": [
+              "FREE",
+              "PAID",
+              "MEMBERSHIP"
+            ]
+          },
+          "price": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "PUBLISHED",
+              "STOPPED"
+            ]
+          },
+          "likeCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "publishedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "accessible": {
+            "type": "boolean"
+          },
+          "body": {
+            "type": "string"
+          }
+        }
+      },
+      "PurchaseContentRequest": {
+        "type": "object",
+        "properties": {
+          "contentId": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "example": 1,
+            "exclusiveMinimum": 0
+          }
+        },
+        "required": [
+          "contentId"
+        ]
+      },
+      "PurchaseResponse": {
+        "type": "object",
+        "properties": {
+          "purchaseId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "targetType": {
+            "type": "string",
+            "enum": [
+              "CONTENT",
+              "MEMBERSHIP",
+              "DONATION"
+            ]
+          },
+          "targetId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sellerId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "listPrice": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "paidPointAmount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "freePointAmount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "COMPLETED",
+              "REFUNDED"
+            ]
+          },
+          "purchasedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "refundedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "RefundRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "example": "잘못 구매",
+            "maxLength": 255,
+            "minLength": 0
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "SignupRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "reader@motif.com",
+            "maxLength": 255,
+            "minLength": 0
+          },
+          "password": {
+            "type": "string",
+            "example": "password123",
+            "pattern": "^(?=.*[A-Za-z])(?=.*[0-9]).{8,64}$"
+          },
+          "nickname": {
+            "type": "string",
+            "example": "모티프독자",
+            "pattern": "^[가-힣A-Za-z0-9_]{2,30}$"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "MemberResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "email": {
+            "type": "string"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "READER",
+              "CREATOR",
+              "ADMIN"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WithdrawRequest": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "password"
+        ]
+      },
+      "WithdrawalCreateRequest": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "example": 10000,
+            "minimum": 1
+          }
+        },
+        "required": [
+          "amount"
+        ]
+      },
+      "PayoutResponse": {
+        "type": "object",
+        "properties": {
+          "payoutId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "payoutNo": {
+            "type": "string"
+          },
+          "grossAmount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "incomeTax": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "localTax": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "netAmount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "COMPLETED",
+              "FAILED"
+            ]
+          },
+          "failReason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "paidAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "WithdrawalResponse": {
+        "type": "object",
+        "properties": {
+          "withdrawalId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "creatorId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "amount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "REQUESTED",
+              "APPROVED",
+              "REJECTED",
+              "PAID",
+              "FAILED"
+            ]
+          },
+          "rejectReason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reviewedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "payout": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PayoutResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "CreatorApplyRequest": {
+        "type": "object",
+        "properties": {
+          "intro": {
+            "type": "string",
+            "example": "여행 에세이를 연재합니다",
+            "maxLength": 500,
+            "minLength": 0
+          },
+          "portfolioUrl": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "https://blog.example.com",
+            "maxLength": 500,
+            "minLength": 0,
+            "pattern": "^https?://.*"
+          }
+        },
+        "required": [
+          "intro"
+        ]
+      },
+      "CreatorApplicationResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "memberId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "intro": {
+            "type": "string"
+          },
+          "portfolioUrl": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "REQUESTED",
+              "APPROVED",
+              "REJECTED"
+            ]
+          },
+          "rejectReason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "reviewedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ChargeRequest": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "example": 10000,
+            "exclusiveMinimum": 0
+          }
+        },
+        "required": [
+          "amount"
+        ]
+      },
+      "ChargeResponse": {
+        "type": "object",
+        "properties": {
+          "orderNo": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "PAID",
+              "FAILED",
+              "PARTIAL_CANCELED",
+              "CANCELED"
+            ]
+          },
+          "paidAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "ChargeConfirmRequest": {
+        "type": "object",
+        "properties": {
+          "orderNo": {
+            "type": "string",
+            "example": "CHG-...",
+            "minLength": 1
+          },
+          "paymentKey": {
+            "type": "string",
+            "example": "fake-payment-key-1",
+            "maxLength": 200,
+            "minLength": 0
+          },
+          "amount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "example": 10000,
+            "exclusiveMinimum": 0
+          }
+        },
+        "required": [
+          "amount",
+          "orderNo",
+          "paymentKey"
+        ]
+      },
+      "RefreshTokenRequest": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "refreshToken"
+        ]
+      },
+      "TokenResponse": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string"
+          },
+          "refreshToken": {
+            "type": "string"
+          },
+          "expiresIn": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "tokenType": {
+            "type": "string"
+          }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "reader@motif.com",
+            "minLength": 1
+          },
+          "password": {
+            "type": "string",
+            "example": "password123",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "WithholdingTaxRunResult": {
+        "type": "object",
+        "properties": {
+          "taxMonth": {
+            "type": "string"
+          },
+          "rowCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "RejectRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 0
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "DailySettlementRunResult": {
+        "type": "object",
+        "properties": {
+          "settlementDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "assignedSalesCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "settledCreatorCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skippedCreatorCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failedCreatorIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          "heldCreatorIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        }
+      },
+      "ReconciliationRunResponse": {
+        "type": "object",
+        "properties": {
+          "runId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "targetDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "attempt": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "RUNNING",
+              "MATCHED",
+              "MISMATCHED",
+              "FAILED"
+            ]
+          },
+          "paymentCount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
+          },
+          "paymentAmount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          },
+          "settlementCount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
+          },
+          "settlementAmount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          },
+          "mismatchCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "ResolveMismatchRequest": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 0
+          }
+        },
+        "required": [
+          "note"
+        ]
+      },
+      "MismatchResponse": {
+        "type": "object",
+        "properties": {
+          "mismatchId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "runId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "purchaseId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "salesType": {
+            "type": "string",
+            "enum": [
+              "SALE",
+              "REFUND"
+            ]
+          },
+          "creatorId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "mismatchType": {
+            "type": "string",
+            "enum": [
+              "MISSING_IN_SETTLEMENT",
+              "MISSING_IN_PAYMENT",
+              "AMOUNT_DIFF",
+              "STATUS_DIFF"
+            ]
+          },
+          "paymentAmount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          },
+          "settlementAmount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          },
+          "resolvedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "resolvedBy": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          },
+          "resolutionNote": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "RepublishResponse": {
+        "type": "object",
+        "properties": {
+          "purchaseId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "requeuedEventCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "OutboxEventResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "eventId": {
+            "type": "string"
+          },
+          "aggregateType": {
+            "type": "string"
+          },
+          "aggregateId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "PUBLISHED",
+              "FAILED"
+            ]
+          },
+          "retryCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "traceId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "publishedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "AdminMemberResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "email": {
+            "type": "string"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "READER",
+              "CREATOR",
+              "ADMIN"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "SUSPENDED",
+              "WITHDRAWN"
+            ]
+          },
+          "suspendedReason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "SuspendRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 0
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "FeePolicyCreateRequest": {
+        "type": "object",
+        "properties": {
+          "creatorId": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "null이면 기본 요율 변경",
+            "example": 12
+          },
+          "revenueType": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "CONTENT",
+              "MEMBERSHIP",
+              "DONATION"
+            ],
+            "example": "CONTENT"
+          },
+          "feeRate": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "0.1000 = 10% / 최대 0.5000",
+            "example": 0.1
+          },
+          "effectiveFrom": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "null이면 지금부터 / 과거 불가",
+            "example": "2026-12-01T00:00:00"
+          },
+          "reason": {
+            "type": "string",
+            "example": "2026 우수 창작자 계약",
+            "maxLength": 255,
+            "minLength": 0
+          }
+        },
+        "required": [
+          "feeRate",
+          "reason",
+          "revenueType"
+        ]
+      },
+      "FeePolicyResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "creatorId": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          },
+          "revenueType": {
+            "type": "string",
+            "enum": [
+              "CONTENT",
+              "MEMBERSHIP",
+              "DONATION"
+            ]
+          },
+          "feeRate": {
+            "type": "number"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endedBy": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          },
+          "endReason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "FeePolicyEndRequest": {
+        "type": "object",
+        "properties": {
+          "endAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "null이면 지금 / 과거 불가",
+            "example": "2027-01-01T00:00:00"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 0
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "ReviewRequest": {
+        "type": "object",
+        "properties": {
+          "approved": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "approved"
+        ]
+      },
+      "CreatorRejectRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 0
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "CategoryCreateRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "에세이",
+            "maxLength": 30,
+            "minLength": 0
+          },
+          "sortOrder": {
+            "type": "integer",
+            "format": "int32",
+            "example": 1,
+            "minimum": 0
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "CategoryResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "sortOrder": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "SliceResponsePurchaseResponse": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseResponse"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hasNext": {
+            "type": "boolean"
+          }
+        }
+      },
+      "WalletResponse": {
+        "type": "object",
+        "properties": {
+          "paidBalance": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "freeBalance": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalBalance": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PointHistoryResponse": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "CHARGE",
+              "GRANT",
+              "USE",
+              "REFUND",
+              "CHARGE_CANCEL",
+              "EXPIRE"
+            ]
+          },
+          "amount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "balanceAfter": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SliceResponsePointHistoryResponse": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PointHistoryResponse"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hasNext": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ContentSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "creatorId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "creatorNickname": {
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "title": {
+            "type": "string"
+          },
+          "preview": {
+            "type": "string"
+          },
+          "thumbnailUrl": {
+            "type": "string"
+          },
+          "accessType": {
+            "type": "string",
+            "enum": [
+              "FREE",
+              "PAID",
+              "MEMBERSHIP"
+            ]
+          },
+          "price": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "PUBLISHED",
+              "STOPPED"
+            ]
+          },
+          "likeCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "publishedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SliceResponseContentSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentSummaryResponse"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hasNext": {
+            "type": "boolean"
+          }
+        }
+      },
+      "WithholdingTaxRow": {
+        "type": "object",
+        "properties": {
+          "taxMonth": {
+            "type": "string"
+          },
+          "creatorId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "creatorType": {
+            "type": "string",
+            "enum": [
+              "INDIVIDUAL",
+              "BUSINESS"
+            ]
+          },
+          "payoutCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "grossAmount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "incomeTax": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "localTax": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "SliceResponseWithdrawalResponse": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WithdrawalResponse"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hasNext": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SalesRecordResponse": {
+        "type": "object",
+        "properties": {
+          "purchaseId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "SALE",
+              "REFUND"
+            ]
+          },
+          "listPrice": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "feeRate": {
+            "type": "number"
+          },
+          "feeAmount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "settlementDate": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          }
+        }
+      },
+      "SliceResponseSalesRecordResponse": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SalesRecordResponse"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hasNext": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AppliedFeeRateResponse": {
+        "type": "object",
+        "properties": {
+          "revenueType": {
+            "type": "string",
+            "enum": [
+              "CONTENT",
+              "MEMBERSHIP",
+              "DONATION"
+            ]
+          },
+          "feeRate": {
+            "type": "number"
+          },
+          "source": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "DailySettlementResponse": {
+        "type": "object",
+        "properties": {
+          "settlementDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "grossSales": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "refundAmount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "feeAmount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "netAmount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "holdAmount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "holdReleaseDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "holdReleaseAmount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "carryOverAmount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "payableAmount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "SliceResponseDailySettlementResponse": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DailySettlementResponse"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hasNext": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CreatorBalanceResponse": {
+        "type": "object",
+        "properties": {
+          "availableAmount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "heldAmount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "WithholdingTaxMonthResponse": {
+        "type": "object",
+        "properties": {
+          "taxMonth": {
+            "type": "string"
+          },
+          "creatorCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "payoutCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "grossAmount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "incomeTax": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "localTax": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WithholdingTaxRow"
+            }
+          }
+        }
+      },
+      "SliceResponseMismatchResponse": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MismatchResponse"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hasNext": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SliceResponseOutboxEventResponse": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboxEventResponse"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hasNext": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}
