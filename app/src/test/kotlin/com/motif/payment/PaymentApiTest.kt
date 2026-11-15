@@ -8,6 +8,8 @@ import com.motif.payment.outbox.OutboxRelay
 import com.motif.payment.repository.OutboxEventRepository
 import com.motif.payment.repository.PointLotRepository
 import com.motif.payment.service.PurchaseService
+import com.motif.settlement.domain.SalesType
+import com.motif.settlement.repository.SalesRecordRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -39,6 +41,7 @@ class PaymentApiTest @Autowired constructor(
     private val lotRepository: PointLotRepository,
     private val outboxEventRepository: OutboxEventRepository,
     private val outboxRelay: OutboxRelay,
+    private val salesRecordRepository: SalesRecordRepository,
     private val jsonMapper: JsonMapper,
 ) {
 
@@ -139,6 +142,11 @@ class PaymentApiTest @Autowired constructor(
         val published = events.stream(PurchaseCompletedEvent::class.java).toList()
         assertThat(published.map { it.purchaseId }).contains(purchaseId)
         assertThat(outboxEventRepository.findById(outbox[0].id!!).get().status.name).isEqualTo("PUBLISHED")
+
+        // settlement가 같은 트랜잭션에서 판매 원장에 기록
+        val sale = salesRecordRepository.findByPurchaseIdAndType(purchaseId, SalesType.SALE)!!
+        assertThat(sale.creatorId).isEqualTo(creatorId)
+        assertThat(sale.feeAmount).isEqualTo(450)
     }
 
     @Test

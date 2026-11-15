@@ -603,9 +603,9 @@ Enum ledger_bucket {
 }
 
 Enum ledger_type {
-  DAILY_SETTLEMENT [note: 'AVAILABLE + payable_amount']
+  DAILY_SETTLEMENT [note: 'AVAILABLE + payable_amount (양수일 때만, 풀린 보류금 포함)']
   HOLD [note: 'HELD + 오늘 묶은 보류금']
-  HOLD_RELEASE [note: 'HELD - / AVAILABLE + 같은 금액, 2행']
+  HOLD_RELEASE [note: 'HELD - 풀린 보류금 / AVAILABLE 쪽은 DAILY_SETTLEMENT에 포함']
   WITHDRAWAL [note: 'AVAILABLE - 출금 신청액']
   WITHDRAWAL_REJECT [note: 'AVAILABLE + 반려 복구']
   PAYOUT_FAIL [note: 'AVAILABLE + 송금 실패 복구']
@@ -618,15 +618,18 @@ Table fee_policy {
   revenue_type revenue_type [not null, note: '판매 유형별 수수료율 / 후원은 낮게']
   fee_rate decimal(5,4) [not null, note: '0.1500 = 15%']
   effective_from datetime [not null, note: '이 시각 이후 판매분부터 적용 / 소급 안 함']
+  effective_to datetime [note: '창작자 계약 종료 시각 / 이후 기본 요율']
   reason varchar(255)
   created_by bigint [not null, note: '변경한 관리자 member.id']
+  ended_by bigint [note: '종료한 관리자 member.id']
+  end_reason varchar(255)
   created_at datetime [not null]
 
   indexes {
     (creator_id, revenue_type, effective_from) [note: '적용 수수료율 = effective_from <= 판매 시각 중 가장 최근']
   }
 
-  Note: '행 추가만 / 기본값(creator_id NULL) 중복은 코드로 막음'
+  Note: '행 추가만 (계약 종료 컬럼만 한 번 수정) / 적용 = 유효한 계약 요율 우선, 없으면 기본값 중 effective_from 최신'
 }
 
 Table hold_policy {
