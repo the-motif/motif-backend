@@ -1,8 +1,8 @@
 package com.motif.member
 
+import com.motif.support.IntegrationTest
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
@@ -10,7 +10,7 @@ import org.springframework.test.web.servlet.post
 import org.springframework.transaction.annotation.Transactional
 
 // 테스트마다 롤백
-@SpringBootTest
+@IntegrationTest
 @AutoConfigureMockMvc
 @Transactional
 class SignupApiTest @Autowired constructor(

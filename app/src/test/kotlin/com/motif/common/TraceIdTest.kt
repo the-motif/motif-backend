@@ -5,10 +5,10 @@ import com.motif.common.trace.TraceId
 import com.motif.payment.outbox.OutboxRelay
 import com.motif.payment.outbox.OutboxWriter
 import com.motif.payment.repository.OutboxEventRepository
+import com.motif.support.IntegrationTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.context.annotation.Bean
@@ -20,7 +20,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.random.Random
 
-@SpringBootTest
+@IntegrationTest
 @AutoConfigureMockMvc
 @Transactional
 class TraceIdTest @Autowired constructor(

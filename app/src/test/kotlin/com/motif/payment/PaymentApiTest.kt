@@ -10,11 +10,11 @@ import com.motif.payment.repository.PointLotRepository
 import com.motif.payment.service.PurchaseService
 import com.motif.settlement.domain.SalesType
 import com.motif.settlement.repository.SalesRecordRepository
+import com.motif.support.IntegrationTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.http.MediaType
 import org.springframework.security.core.authority.SimpleGrantedAuthority
@@ -30,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional
 import tools.jackson.databind.json.JsonMapper
 import java.util.UUID
 
-@SpringBootTest
+@IntegrationTest
 @AutoConfigureMockMvc
 @Transactional
 @RecordApplicationEvents

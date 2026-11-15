@@ -1,0 +1,10 @@
+# 테스트 전용 / DB·Redis 접속 정보는 Testcontainers가 주입 (@ServiceConnection)
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+motif:
+  crypto:
+    secret-key: dGVzdC1vbmx5LWtleS10ZXN0LW9ubHkta2V5LTMyYiE=  # 테스트 전용 값
+  jwt:
+    secret: test-only-jwt-secret-test-only-jwt-secret  # 테스트 전용 값

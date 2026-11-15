@@ -10,11 +10,11 @@ import com.motif.settlement.repository.ReconciliationMismatchRepository
 import com.motif.settlement.service.DailySettlementJob
 import com.motif.settlement.service.ReconciliationJob
 import com.motif.settlement.service.SalesRecordService
+import com.motif.support.IntegrationTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.http.MediaType
 import org.springframework.jdbc.core.simple.JdbcClient
@@ -30,7 +30,7 @@ import java.util.UUID
 import kotlin.random.Random
 
 // 대상일은 과거 고정 (다른 데이터와 안 겹치는 날짜), 창작자 ID 무작위
-@SpringBootTest
+@IntegrationTest
 @AutoConfigureMockMvc
 @Transactional
 class ReconciliationTest @Autowired constructor(
