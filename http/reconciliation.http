@@ -1,0 +1,26 @@
+### 관리자: 대사 수동 실행 (지난 날짜만, 다시 돌리면 attempt 증가)
+POST {{baseUrl}}/api/admin/reconciliations/run?date=2026-11-14
+Authorization: Bearer {{accessToken}}
+
+> {%
+    client.global.set("reconRunId", response.body.runId);
+%}
+
+### 관리자: 날짜별 대사 실행 이력
+GET {{baseUrl}}/api/admin/reconciliations?date=2026-11-14
+Authorization: Bearer {{accessToken}}
+
+### 관리자: 실행별 불일치
+GET {{baseUrl}}/api/admin/reconciliations/{{reconRunId}}/mismatches
+Authorization: Bearer {{accessToken}}
+
+### 관리자: 미해결 불일치 (= 정산 보류 중)
+GET {{baseUrl}}/api/admin/reconciliations/mismatches?resolved=false
+Authorization: Bearer {{accessToken}}
+
+### 관리자: 불일치 해결 처리
+POST {{baseUrl}}/api/admin/reconciliations/mismatches/1/resolve
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "note": "outbox 재발행으로 판매 원장 복구" }

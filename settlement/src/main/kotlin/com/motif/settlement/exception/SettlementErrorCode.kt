@@ -26,7 +26,11 @@ enum class SettlementErrorCode(
     SETTLEMENT_INFO_NOT_FOUND(HttpStatus.NOT_FOUND, "SETTLEMENT_015", "등록된 정산 정보가 없습니다"),
     INVALID_TAX_PROFILE(HttpStatus.BAD_REQUEST, "SETTLEMENT_016", "개인은 주민등록번호, 사업자는 사업자등록번호가 필요합니다"),
     PAYOUT_IN_PROGRESS(HttpStatus.CONFLICT, "SETTLEMENT_017", "같은 지급을 처리 중입니다"),
-    PAYOUT_NOT_FOUND(HttpStatus.NOT_FOUND, "SETTLEMENT_018", "지급 건을 찾을 수 없습니다");
+    PAYOUT_NOT_FOUND(HttpStatus.NOT_FOUND, "SETTLEMENT_018", "지급 건을 찾을 수 없습니다"),
+    RECONCILIATION_RUNNING(HttpStatus.CONFLICT, "SETTLEMENT_019", "같은 날짜의 대사가 진행 중입니다"),
+    INVALID_RECONCILIATION_DATE(HttpStatus.BAD_REQUEST, "SETTLEMENT_020", "대사는 지난 날짜만 실행할 수 있습니다"),
+    MISMATCH_NOT_FOUND(HttpStatus.NOT_FOUND, "SETTLEMENT_021", "대사 불일치 건을 찾을 수 없습니다"),
+    MISMATCH_ALREADY_RESOLVED(HttpStatus.CONFLICT, "SETTLEMENT_022", "이미 해결된 불일치 건입니다");
 
     override fun getStatus() = status
 

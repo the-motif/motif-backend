@@ -803,18 +803,19 @@ Table reconciliation_mismatch {
   id bigint [pk, increment]
   run_id bigint [not null]
   purchase_id bigint [not null]
+  sales_type sales_type [not null, note: 'SALE / REFUND / 같은 구매의 판매·환불 구분']
   creator_id bigint [not null, note: '정산 보류 대상 / 결제 조회 결과에서 채움 (purchase 조인 안 함)']
   mismatch_type mismatch_type [not null]
   payment_amount bigint
   settlement_amount bigint
   resolved_at datetime [note: 'NULL이면 미해결 / 해결 전엔 해당 창작자 정산 보류']
-  resolved_by bigint
+  resolved_by bigint [note: '0이면 재대사 자동 해결']
   resolution_note varchar(255)
   created_at datetime [not null]
   updated_at datetime [not null]
 
   indexes {
-    (run_id, purchase_id, mismatch_type) [unique]
+    (run_id, purchase_id, sales_type, mismatch_type) [unique]
     (creator_id, resolved_at)
   }
 }
