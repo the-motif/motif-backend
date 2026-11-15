@@ -63,6 +63,13 @@ class OutboxEvent(
         publishedAt = now
     }
 
+    // 관리자 재발행 / 받는 쪽이 eventId로 중복을 거르므로 PUBLISHED도 다시 보내도 안전
+    fun requeue() {
+        check(status != OutboxStatus.PENDING) { "이미 PENDING id=$id" }
+        status = OutboxStatus.PENDING
+        retryCount = 0
+    }
+
     // 최대 횟수 넘으면 FAILED (수동 확인)
     fun markRetry(maxRetry: Int) {
         retryCount += 1

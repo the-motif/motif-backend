@@ -1,6 +1,9 @@
 package com.motif.settlement.controller
 
+import com.motif.common.exception.BusinessException
 import com.motif.common.response.SliceResponse
+import com.motif.payment.api.PaymentReconciliationApi
+import com.motif.settlement.exception.SettlementErrorCode
 import com.motif.member.auth.CurrentMemberId
 import com.motif.settlement.domain.MismatchType
 import com.motif.settlement.domain.ReconciliationMismatch
@@ -71,6 +74,8 @@ data class MismatchResponse(
     }
 }
 
+data class RepublishResponse(val purchaseId: Long, val requeuedEventCount: Int)
+
 data class ResolveMismatchRequest(
     @NotBlank
     @Size(max = 255)
@@ -84,6 +89,7 @@ class AdminReconciliationController(
     private val writer: ReconciliationWriter,
     private val runRepository: ReconciliationRunRepository,
     private val mismatchRepository: ReconciliationMismatchRepository,
+    private val paymentApi: PaymentReconciliationApi,
 ) {
 
     @Operation(summary = "대사 수동 실행", description = "지난 날짜만 / 다시 돌리면 attempt 증가, 이전 미해결 건은 자동으로 닫힘")
@@ -115,6 +121,16 @@ class AdminReconciliationController(
             mismatchRepository.findAllByResolvedAtIsNullOrderByIdAsc(pageable)
         }
         return SliceResponse.of(slice, MismatchResponse::from)
+    }
+
+    @Operation(
+        summary = "불일치 구매의 이벤트 재발행",
+        description = "결제 이벤트를 다시 보냄 (원장에 없음·환불 누락용) → 1초 뒤 대사 재실행하면 자동 해결",
+    )
+    @PostMapping("/api/admin/reconciliations/mismatches/{id}/republish")
+    fun republish(@PathVariable id: Long): RepublishResponse {
+        val mismatch = mismatchRepository.findById(id).orElseThrow { BusinessException(SettlementErrorCode.MISMATCH_NOT_FOUND) }
+        return RepublishResponse(mismatch.purchaseId, paymentApi.republishEvents(mismatch.purchaseId))
     }
 
     @Operation(summary = "불일치 해결 처리", description = "원인 조치 후 메모와 함께 닫음 → 다음 일일 정산부터 보류 해제")

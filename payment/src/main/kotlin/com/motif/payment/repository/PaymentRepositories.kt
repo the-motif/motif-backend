@@ -2,6 +2,7 @@ package com.motif.payment.repository
 
 import com.motif.payment.domain.ChargeOrder
 import com.motif.payment.domain.OutboxEvent
+import com.motif.payment.domain.OutboxStatus
 import com.motif.payment.domain.PointKind
 import com.motif.payment.domain.PointLot
 import com.motif.payment.domain.PointLotUsage
@@ -126,4 +127,10 @@ interface OutboxEventRepository : JpaRepository<OutboxEvent, Long> {
     fun findPendingByIdForUpdate(@Param("id") id: Long): OutboxEvent?
 
     fun findAllByAggregateTypeAndAggregateId(aggregateType: String, aggregateId: Long): List<OutboxEvent>
+
+    fun findAllByStatusOrderByIdAsc(status: OutboxStatus, pageable: Pageable): Slice<OutboxEvent>
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select e from OutboxEvent e where e.id = :id")
+    fun findByIdForUpdate(@Param("id") id: Long): OutboxEvent?
 }

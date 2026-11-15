@@ -19,7 +19,9 @@ enum class PaymentErrorCode(
     PURCHASE_NOT_FOUND(HttpStatus.NOT_FOUND, "PAYMENT_008", "구매 내역을 찾을 수 없습니다"),
     NOT_REFUNDABLE(HttpStatus.CONFLICT, "PAYMENT_009", "환불할 수 없는 구매입니다 (열람했거나 이미 환불됨)"),
     IDEMPOTENCY_KEY_REUSED(HttpStatus.UNPROCESSABLE_CONTENT, "PAYMENT_010", "다른 요청에 이미 사용한 요청 키입니다"),
-    CHARGE_NOT_PENDING(HttpStatus.CONFLICT, "PAYMENT_011", "이미 처리된 충전 요청입니다");
+    CHARGE_NOT_PENDING(HttpStatus.CONFLICT, "PAYMENT_011", "이미 처리된 충전 요청입니다"),
+    OUTBOX_EVENT_NOT_FOUND(HttpStatus.NOT_FOUND, "PAYMENT_012", "이벤트를 찾을 수 없습니다"),
+    OUTBOX_EVENT_PENDING(HttpStatus.CONFLICT, "PAYMENT_013", "이미 발행 대기 중인 이벤트입니다");
 
     override fun getStatus() = status
 
