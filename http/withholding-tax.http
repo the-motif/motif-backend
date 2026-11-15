@@ -1,0 +1,11 @@
+### 관리자: 원천세 월 집계 실행 (지난 달만, 재실행 안전)
+POST {{baseUrl}}/api/admin/withholding-taxes/run?month=2026-10
+Authorization: Bearer {{accessToken}}
+
+### 관리자: 월 집계 조회 (신고용 합계 + 창작자별)
+GET {{baseUrl}}/api/admin/withholding-taxes?month=2026-10
+Authorization: Bearer {{accessToken}}
+
+### 창작자: 내 원천징수 내역
+GET {{baseUrl}}/api/creator/withholding-taxes?year=2026
+Authorization: Bearer {{accessToken}}
