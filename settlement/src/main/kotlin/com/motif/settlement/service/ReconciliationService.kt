@@ -17,6 +17,7 @@ import com.motif.settlement.exception.SettlementErrorCode
 import com.motif.settlement.repository.ReconciliationMismatchRepository
 import com.motif.settlement.repository.ReconciliationRunRepository
 import com.motif.settlement.repository.SalesRecordRepository
+import com.motif.common.trace.TraceId
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
@@ -42,7 +43,7 @@ class ReconciliationJob(
     @Scheduled(cron = "\${motif.reconciliation.cron:0 5 0 * * *}", zone = "Asia/Seoul")
     fun scheduledRun() {
         try {
-            run(LocalDate.now(clock).minusDays(1))
+            TraceId.run("recon") { run(LocalDate.now(clock).minusDays(1)) }
         } catch (e: BusinessException) {
             log.info("대사 건너뜀: {}", e.message)
         }

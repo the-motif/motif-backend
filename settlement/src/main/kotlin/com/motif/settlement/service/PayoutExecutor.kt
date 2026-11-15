@@ -9,6 +9,7 @@ import com.motif.settlement.domain.Payout
 import com.motif.settlement.domain.PayoutStatus
 import com.motif.settlement.exception.SettlementErrorCode
 import com.motif.settlement.repository.PayoutRepository
+import com.motif.common.trace.TraceId
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
@@ -62,7 +63,7 @@ class PayoutExecutor(
 
     // 일시 오류로 남은 지급 자동 재시도
     @Scheduled(fixedDelayString = "\${motif.payout.retry-delay-ms:600000}", initialDelayString = "\${motif.payout.retry-delay-ms:600000}")
-    fun retryPending() {
+    fun retryPending() = TraceId.run("payout-retry") {
         payoutRepository.findAllByStatusOrderByIdAsc(PayoutStatus.PENDING).forEach { payout ->
             try {
                 execute(payout.id!!)
