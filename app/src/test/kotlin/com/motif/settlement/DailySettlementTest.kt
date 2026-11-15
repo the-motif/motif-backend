@@ -12,11 +12,11 @@ import com.motif.settlement.repository.DailySettlementRepository
 import com.motif.settlement.repository.SalesRecordRepository
 import com.motif.settlement.service.DailySettlementJob
 import com.motif.settlement.service.SalesRecordService
+import com.motif.support.IntegrationTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.jdbc.core.simple.JdbcClient
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -24,8 +24,8 @@ import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.random.Random
 
-// 정산일은 과거 고정 (미래 날짜 불가), 창작자 ID는 무작위 → 로컬 DB 데이터와 안 섞임
-@SpringBootTest
+// 정산일은 과거 고정 (미래 날짜 불가), 창작자 ID는 무작위 → 같은 컨테이너의 다른 테스트 데이터와 안 섞임
+@IntegrationTest
 @Transactional
 class DailySettlementTest @Autowired constructor(
     private val salesRecordService: SalesRecordService,

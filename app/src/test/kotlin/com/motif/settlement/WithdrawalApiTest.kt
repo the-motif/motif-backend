@@ -6,11 +6,11 @@ import com.motif.settlement.domain.LedgerBucket
 import com.motif.settlement.domain.LedgerType
 import com.motif.settlement.repository.BalanceLedgerRepository
 import com.motif.settlement.repository.CreatorBalanceRepository
+import com.motif.support.IntegrationTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.http.MediaType
 import org.springframework.jdbc.core.simple.JdbcClient
@@ -27,7 +27,7 @@ import tools.jackson.databind.json.JsonMapper
 import java.time.LocalDateTime
 import java.util.UUID
 
-@SpringBootTest
+@IntegrationTest
 @AutoConfigureMockMvc
 @Transactional
 class WithdrawalApiTest @Autowired constructor(

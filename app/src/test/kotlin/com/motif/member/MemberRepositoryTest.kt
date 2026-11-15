@@ -6,16 +6,21 @@ import com.motif.member.domain.Member
 import com.motif.member.domain.MemberRole
 import com.motif.member.domain.MemberStatus
 import com.motif.member.repository.MemberRepository
+import com.motif.support.SharedContainers
 import jakarta.persistence.EntityManager
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase
+import org.springframework.boot.testcontainers.context.ImportTestcontainers
 import org.springframework.context.annotation.Import
+import org.springframework.test.context.ActiveProfiles
 
-// 로컬 MySQL(Flyway 적용) 기준 / 테스트 후 롤백
+// MySQL 컨테이너(Flyway 적용) 기준 / 테스트 후 롤백
 @DataJpaTest
+@ActiveProfiles("test")
+@ImportTestcontainers(SharedContainers::class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import(ClockConfig::class, JpaAuditingConfig::class)
 class MemberRepositoryTest @Autowired constructor(

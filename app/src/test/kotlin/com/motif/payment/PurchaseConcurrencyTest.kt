@@ -7,16 +7,17 @@ import com.motif.payment.pg.PgApproval
 import com.motif.payment.repository.PointWalletRepository
 import com.motif.payment.service.ChargeService
 import com.motif.payment.service.PurchaseService
+import com.motif.support.IntegrationTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.http.MediaType
 import org.springframework.jdbc.core.simple.JdbcClient
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt
+import org.springframework.test.context.TestPropertySource
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.post
 import tools.jackson.databind.json.JsonMapper
@@ -29,7 +30,8 @@ import java.util.concurrent.TimeUnit
 
 // 트랜잭션 없는 테스트 (스레드마다 실제 커밋) → 끝나면 직접 삭제
 // Redis 락을 거치지 않고 PurchaseService를 바로 호출 → DB 조건부 UPDATE만으로 막히는지 확인
-@SpringBootTest(properties = ["motif.outbox.relay-delay-ms=3600000"])
+@IntegrationTest
+@TestPropertySource(properties = ["motif.outbox.relay-delay-ms=3600000"])
 @AutoConfigureMockMvc
 class PurchaseConcurrencyTest @Autowired constructor(
     private val mockMvc: MockMvc,

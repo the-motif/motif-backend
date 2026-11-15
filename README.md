@@ -33,3 +33,12 @@ python -c "import os,base64;print(base64.b64encode(os.urandom(32)).decode())"
 
 로그인 후 받은 `accessToken`을 Swagger 우측 Authorize에 넣으면 인증 필요한 API도 호출 가능.
 포트를 바꿨다면 `http/http-client.private.env.json`(커밋 안 됨)에 `baseUrl`을 덮어쓴다.
+
+## 테스트
+
+```bash
+./gradlew test
+```
+
+Docker만 켜져 있으면 된다. MySQL·Redis는 Testcontainers가 띄우고 끝나면 지운다 (`application-local.yaml`·docker compose 불필요).
+설정은 `app/src/test/resources/application-test.yaml`, 통합 테스트는 `@IntegrationTest`를 붙인다.

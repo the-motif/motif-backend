@@ -1,9 +1,9 @@
 package com.motif
 
+import com.motif.support.IntegrationTest
 import org.junit.jupiter.api.Test
-import org.springframework.boot.test.context.SpringBootTest
 
-@SpringBootTest
+@IntegrationTest
 class MotifBackendApplicationTests {
 
 	@Test

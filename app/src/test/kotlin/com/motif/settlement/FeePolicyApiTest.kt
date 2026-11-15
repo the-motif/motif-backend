@@ -6,11 +6,11 @@ import com.motif.member.repository.MemberRepository
 import com.motif.settlement.domain.SalesType
 import com.motif.settlement.repository.SalesRecordRepository
 import com.motif.settlement.service.SalesRecordService
+import com.motif.support.IntegrationTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.http.MediaType
 import org.springframework.security.core.authority.SimpleGrantedAuthority
@@ -26,7 +26,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.random.Random
 
-@SpringBootTest
+@IntegrationTest
 @AutoConfigureMockMvc
 @Transactional
 class FeePolicyApiTest @Autowired constructor(

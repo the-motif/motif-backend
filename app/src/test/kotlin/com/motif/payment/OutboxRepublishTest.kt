@@ -11,10 +11,10 @@ import com.motif.settlement.domain.ReconciliationStatus
 import com.motif.settlement.repository.ReconciliationMismatchRepository
 import com.motif.settlement.repository.SalesRecordRepository
 import com.motif.settlement.service.ReconciliationJob
+import com.motif.support.IntegrationTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.jdbc.core.simple.JdbcClient
 import org.springframework.jdbc.support.GeneratedKeyHolder
@@ -30,7 +30,7 @@ import java.util.UUID
 import kotlin.random.Random
 
 // 대상일 과거 고정, 창작자 ID 무작위
-@SpringBootTest
+@IntegrationTest
 @AutoConfigureMockMvc
 @Transactional
 class OutboxRepublishTest @Autowired constructor(
