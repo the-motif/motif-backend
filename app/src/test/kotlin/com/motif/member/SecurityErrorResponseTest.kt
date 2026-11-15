@@ -33,10 +33,18 @@ class SecurityErrorResponseTest @Autowired constructor(
     }
 
     @Test
-    fun `없는 URL → 401이 아니라 404`() {
+    @WithMockUser
+    fun `로그인한 상태로 없는 URL → 404`() {
         mockMvc.get("/api/no-such-path").andExpect {
             status { isNotFound() }
             jsonPath("$.code") { value("COMMON_002") }
+        }
+    }
+
+    @Test
+    fun `로그인 없이 없는 URL → 401`() {
+        mockMvc.get("/api/no-such-path").andExpect {
+            status { isUnauthorized() }
         }
     }
 }

@@ -49,4 +49,30 @@ class Member(
 
     var withdrawnAt: LocalDateTime? = null
         protected set
+
+    fun isActive() = status == MemberStatus.ACTIVE
+
+    fun promoteToCreator() {
+        check(role == MemberRole.READER) { "READER만 창작자 전환 가능 id=$id" }
+        role = MemberRole.CREATOR
+    }
+
+    fun suspend(reason: String) {
+        check(status == MemberStatus.ACTIVE) { "ACTIVE만 정지 가능 id=$id" }
+        status = MemberStatus.SUSPENDED
+        suspendedReason = reason
+    }
+
+    fun unsuspend() {
+        check(status == MemberStatus.SUSPENDED) { "SUSPENDED만 해제 가능 id=$id" }
+        status = MemberStatus.ACTIVE
+        suspendedReason = null
+    }
+
+    // 이메일·닉네임은 유니크 유지 / 같은 이메일 재가입 불가
+    fun withdraw(now: LocalDateTime) {
+        check(status == MemberStatus.ACTIVE) { "ACTIVE만 탈퇴 가능 id=$id" }
+        status = MemberStatus.WITHDRAWN
+        withdrawnAt = now
+    }
 }
