@@ -1,0 +1,52 @@
+### 관리자: 일일 정산 수동 실행 (재실행 안전)
+POST {{baseUrl}}/api/admin/settlements/daily/run?date=2026-11-15
+Authorization: Bearer {{accessToken}}
+
+### 창작자: 내 정산 잔액
+GET {{baseUrl}}/api/creator/settlements/balance
+Authorization: Bearer {{accessToken}}
+
+### 창작자: 일별 정산 내역
+GET {{baseUrl}}/api/creator/settlements/daily
+Authorization: Bearer {{accessToken}}
+
+### 창작자: 판매·환불 내역
+GET {{baseUrl}}/api/creator/settlements/sales
+Authorization: Bearer {{accessToken}}
+
+### 관리자: 창작자 계약 수수료 설정 (creatorId 빼면 기본 요율 변경)
+POST {{baseUrl}}/api/admin/fee-policies
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "creatorId": 1,
+  "revenueType": "CONTENT",
+  "feeRate": "0.1000",
+  "reason": "우수 창작자 계약"
+}
+
+> {%
+    client.global.set("feePolicyId", response.body.id);
+%}
+
+### 관리자: 수수료 이력 (creatorId 없으면 기본 요율)
+GET {{baseUrl}}/api/admin/fee-policies?creatorId=1
+Authorization: Bearer {{accessToken}}
+
+### 관리자: 창작자에게 지금 적용되는 요율
+GET {{baseUrl}}/api/admin/fee-policies/applied?creatorId=1
+Authorization: Bearer {{accessToken}}
+
+### 관리자: 계약 종료 (endAt 빼면 지금)
+POST {{baseUrl}}/api/admin/fee-policies/{{feePolicyId}}/end
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "reason": "계약 만료"
+}
+
+### 창작자: 내 수수료율
+GET {{baseUrl}}/api/creator/settlements/fee-rates
+Authorization: Bearer {{accessToken}}
