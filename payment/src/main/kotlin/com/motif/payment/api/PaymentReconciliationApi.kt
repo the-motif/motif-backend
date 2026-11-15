@@ -2,12 +2,13 @@ package com.motif.payment.api
 
 import com.motif.payment.domain.Purchase
 import com.motif.payment.domain.PurchaseStatus
+import com.motif.payment.outbox.OutboxAdminService
 import com.motif.payment.repository.PurchaseRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 
-// 정산 대사용 결제 거래 조회 / settlement가 호출
+// 정산 대사용 결제 거래 조회·이벤트 재발행 / settlement가 호출
 interface PaymentReconciliationApi {
 
     // [from, to) 구간에 일어난 판매(구매 시각)·환불(환불 시각)
@@ -15,6 +16,9 @@ interface PaymentReconciliationApi {
 
     // 구매 ID별 전체 거래 / 날짜 경계 확인용
     fun transactionsOf(purchaseIds: Collection<Long>): List<PaymentTransactionView>
+
+    // 구매의 이벤트 재발행 / 다시 PENDING이 된 건수
+    fun republishEvents(purchaseId: Long): Int
 }
 
 enum class PaymentTransactionKind { SALE, REFUND }
@@ -32,7 +36,11 @@ data class PaymentTransactionView(
 @Transactional(readOnly = true)
 class PaymentReconciliationQuery(
     private val purchaseRepository: PurchaseRepository,
+    private val outboxAdminService: OutboxAdminService,
 ) : PaymentReconciliationApi {
+
+    @Transactional
+    override fun republishEvents(purchaseId: Long): Int = outboxAdminService.requeuePurchase(purchaseId)
 
     override fun transactionsBetween(from: LocalDateTime, to: LocalDateTime): List<PaymentTransactionView> =
         purchaseRepository.findAllCreatedBetween(from, to).map(::sale) +

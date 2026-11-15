@@ -24,3 +24,15 @@ Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 { "note": "outbox 재발행으로 판매 원장 복구" }
+
+### 관리자: 불일치 구매의 이벤트 재발행 (그다음 대사 재실행)
+POST {{baseUrl}}/api/admin/reconciliations/mismatches/1/republish
+Authorization: Bearer {{accessToken}}
+
+### 관리자: 발행 실패(FAILED) 이벤트 목록
+GET {{baseUrl}}/api/admin/outbox-events?status=FAILED
+Authorization: Bearer {{accessToken}}
+
+### 관리자: 이벤트 하나 재발행
+POST {{baseUrl}}/api/admin/outbox-events/1/requeue
+Authorization: Bearer {{accessToken}}
