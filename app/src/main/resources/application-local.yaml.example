@@ -13,6 +13,9 @@ spring:
       ddl-auto: validate  # 테이블은 Flyway로만
     show-sql: true
 motif:
+  admin:  # 첫 관리자 / 기동 시 없으면 생성
+    email: admin@motif.local
+    password: change-me-1234  # 영문·숫자 포함 8자 이상
   crypto:
     secret-key: change-me-base64-32-bytes  # Base64 32바이트 / README 참고
   jwt:

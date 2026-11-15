@@ -52,6 +52,11 @@ class Member(
 
     fun isActive() = status == MemberStatus.ACTIVE
 
+    // 첫 관리자 생성용 / AdminAccountInitializer만 사용
+    fun grantAdmin() {
+        role = MemberRole.ADMIN
+    }
+
     fun promoteToCreator() {
         check(role == MemberRole.READER) { "READER만 창작자 전환 가능 id=$id" }
         role = MemberRole.CREATOR
