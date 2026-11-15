@@ -762,8 +762,9 @@ Table tax_policy {
 
 Table withholding_tax_monthly {
   id bigint [pk, increment]
-  tax_month char(6) [not null, note: 'YYYYMM / 지급일 기준']
+  tax_month char(6) [not null, note: 'YYYYMM / 지급 완료일 기준']
   creator_id bigint [not null]
+  creator_type creator_type [not null, note: '지급 시점 스냅샷 / 월 중 변경 시 행 2개']
   payout_count int [not null]
   gross_amount bigint [not null]
   income_tax bigint [not null]
@@ -772,7 +773,8 @@ Table withholding_tax_monthly {
   updated_at datetime [not null]
 
   indexes {
-    (tax_month, creator_id) [unique, note: '월 집계 배치 재실행해도 결과 동일']
+    (tax_month, creator_id, creator_type) [unique, note: '재실행 = 그 달 삭제 후 재집계']
+    (creator_id, tax_month)
   }
 
   Note: '원천세 신고용 월 집계 / 매월 초 배치'

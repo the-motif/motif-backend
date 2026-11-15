@@ -30,7 +30,9 @@ enum class SettlementErrorCode(
     RECONCILIATION_RUNNING(HttpStatus.CONFLICT, "SETTLEMENT_019", "같은 날짜의 대사가 진행 중입니다"),
     INVALID_RECONCILIATION_DATE(HttpStatus.BAD_REQUEST, "SETTLEMENT_020", "대사는 지난 날짜만 실행할 수 있습니다"),
     MISMATCH_NOT_FOUND(HttpStatus.NOT_FOUND, "SETTLEMENT_021", "대사 불일치 건을 찾을 수 없습니다"),
-    MISMATCH_ALREADY_RESOLVED(HttpStatus.CONFLICT, "SETTLEMENT_022", "이미 해결된 불일치 건입니다");
+    MISMATCH_ALREADY_RESOLVED(HttpStatus.CONFLICT, "SETTLEMENT_022", "이미 해결된 불일치 건입니다"),
+    WITHHOLDING_RUNNING(HttpStatus.CONFLICT, "SETTLEMENT_023", "같은 달의 원천세 집계가 진행 중입니다"),
+    INVALID_TAX_MONTH(HttpStatus.BAD_REQUEST, "SETTLEMENT_024", "원천세 집계는 지난 달만 실행할 수 있습니다");
 
     override fun getStatus() = status
 
