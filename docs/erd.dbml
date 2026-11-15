@@ -752,7 +752,7 @@ Table tax_policy {
   id bigint [pk, increment]
   creator_type creator_type [not null]
   income_tax_rate decimal(5,4) [not null, note: '개인 0.0300']
-  local_tax_rate decimal(5,4) [not null, note: '개인 0.0030 / 소득세의 10%']
+  local_tax_rate decimal(5,4) [not null, note: '소득세 대비 0.1000 / 지방소득세 = 소득세 × 비율']
   effective_from datetime [not null]
   created_by bigint [not null]
   created_at datetime [not null]

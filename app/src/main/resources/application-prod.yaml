@@ -13,6 +13,8 @@ spring:
       ddl-auto: validate
     show-sql: false
 motif:
+  crypto:
+    secret-key: ${CRYPTO_SECRET_KEY}
   jwt:
     secret: ${JWT_SECRET}
 springdoc:

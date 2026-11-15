@@ -18,6 +18,11 @@ cp app/src/main/resources/application-local.yaml.example app/src/main/resources/
 ```
 
 `application-local.yaml`의 `motif.jwt.secret`은 32바이트 이상 아무 문자열로 채운다.
+`motif.crypto.secret-key`(계좌·주민번호 암호화 키)는 아래 명령 결과로 채운다.
+
+```bash
+python -c "import os,base64;print(base64.b64encode(os.urandom(32)).decode())"
+```
 
 ## API 확인
 
